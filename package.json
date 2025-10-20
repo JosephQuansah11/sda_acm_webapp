@@ -2,6 +2,25 @@
   "name": "sda_acm_webapp",
   "version": "0.1.0",
   "private": true,
+  "configurations": [{
+    "name": "Debug React TS App",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/react-scripts start",
+      "args": [],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "protocol": "inspector",
+      "port": 9229,
+      "env": {
+        "BROWSER": "none", 
+        "NODE_ENV": "development"
+      },
+      "preLaunchTask": "npm: start"  
+    }
+  ],
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -11,14 +30,25 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "axios": "^1.12.2",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "flow-bin": "^0.288.0",
     "react": "^19.2.0",
+    "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.0",
-    "react-scripts": "5.0.1",
+    "react-router-dom": "^7.9.4",
+    "react-scripts": "^5.0.1",
+    "sass": "^1.93.2",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
+  "devDependencies": {
+    "axios-mock-adapter": "^2.1.0"
+  },
   "scripts": {
     "start": "react-scripts start",
+    "flow": "flow",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
