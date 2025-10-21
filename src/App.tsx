@@ -20,7 +20,7 @@ function ProtectedLayout() {
   return (
     <div className="d-flex">
       <CustomNav />
-      <main className="main-content">
+      <main className="app-main main-content">
         <Routes>
           <Route path='/dashboard' element={<Home />} errorElement={<ErrorPage />} />
           <Route path='/members' element={<Members />} errorElement={<ErrorPage />} />
@@ -53,8 +53,7 @@ function AppContent() {
 }
 
 function App() {
-  console.log(localStorage.getItem('authToken'));
-  console.log(localStorage.getItem('loginMethod'));
+
   return (
     <BrowserRouter>
       <ThemeProvider>

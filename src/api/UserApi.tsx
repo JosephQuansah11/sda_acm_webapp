@@ -1,22 +1,22 @@
 import User, { UserForm } from "../models/user/User";
+import axiosInstance from "./authPromise";
 
 export async function editUserById(id: string, user: User): Promise<User> {
-     // console.log("editUserById function calls: ", user);
+    // console.log("editUserById function calls: ", user);
     try {
-        const response = await fetch(`/users/${id}`, {
-            method: 'PUT',
+        const response = await axiosInstance.put(`/api/users/${id}`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             },
             body: JSON.stringify(user)
         });
-        
-        if (!response.ok) {
+
+        if (response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        return await response.json();
+
+        return response.data;
     } catch (error) {
         console.error(error);
         throw error;
@@ -25,19 +25,18 @@ export async function editUserById(id: string, user: User): Promise<User> {
 
 export async function getAllUsers(): Promise<User[]> {
     try {
-        const response = await fetch('/users', {
-            method: 'GET',
+        const response = await axiosInstance.get('/api/users', {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('authToken')}`
             }
         });
-        
-        if (!response.ok) {
+
+        if (response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        return await response.json();
+
+        return response.data;
     } catch (error) {
         console.error(error);
         throw error;
@@ -46,20 +45,19 @@ export async function getAllUsers(): Promise<User[]> {
 
 export async function addUser(user: UserForm): Promise<UserForm> {
     try {
-        const response = await fetch('/users', {
-            method: 'POST',
+        const response = await axiosInstance.post('/api/users', {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('authToken')}`
             },
             body: JSON.stringify(user)
         });
-        
-        if (!response.ok) {
+
+        if (response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        return await response.json();
+
+        return response.data;
     } catch (error) {
         console.error(error);
         throw error;
@@ -68,19 +66,18 @@ export async function addUser(user: UserForm): Promise<UserForm> {
 
 export async function deleteUser(userId: string): Promise<void> {
     try {
-        const response = await fetch(`/users/${userId}`, {
-            method: 'DELETE',
+        const response = await axiosInstance.delete(`/api/users/${userId}`, {
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('authToken')}`
             }
         });
-        
-        if (!response.ok) {
+
+        if (response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        return await response.json();
+
+        return response.data;
     } catch (error) {
         console.error(error);
         throw error;
@@ -89,19 +86,18 @@ export async function deleteUser(userId: string): Promise<void> {
 
 export async function getUserDetail(userId: string): Promise<User> {
     try {
-        const response = await fetch(`/users/${userId}`, {
-            method: 'GET',
+        const response = await axiosInstance.get(`/api/users/${userId}`, {
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('authToken')}`
             }
         });
-        
-        if (!response.ok) {
+
+        if ( response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        return await response.json();
+
+        return response.data;
     } catch (error) {
         console.error(error);
         throw error;

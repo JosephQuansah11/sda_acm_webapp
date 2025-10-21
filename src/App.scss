@@ -122,22 +122,6 @@ main {
     margin-left: calc($navbar-width ); 
 }
 
-// .main-content::before {
-//     content: '';
-//     position: absolute;
-//     top: 0;
-//     left: 0;
-//     right: 0;
-//     bottom: 0;
-//     background-image: url('./images/2149548010.jpg');
-//     background-size: cover;
-//     background-position: center;
-//     background-repeat: no-repeat;
-//     filter: blur(1px);
-//     overflow-y: auto;
-//     background-attachment: fixed; 
-//     z-index: -1;
-// }
 
 .main-content::after {
     content: '';

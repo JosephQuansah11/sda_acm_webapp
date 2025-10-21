@@ -31,7 +31,7 @@ function SettingsComponent() {
                         theme: themeId,
                     }),
                 });
-                console.log(response);
+                console.log("theme changed: ", response);
                 if (response.status === 200) {
                     // Update user context with new theme preference
                     updateUser({
@@ -46,6 +46,7 @@ function SettingsComponent() {
                             },
                         },
                     });
+
                     setMessage({ type: 'success', text: 'Theme updated successfully!' });
                 } else {
                     setMessage({ type: 'error', text: 'Failed to save theme preference' });
@@ -91,7 +92,7 @@ function SettingsComponent() {
                         </Card.Header>
                         <Card.Body className="p-4">
                             {message && (
-                                <Alert 
+                                <Alert
                                     variant={message.type === 'success' ? 'success' : 'danger'}
                                     dismissible
                                     onClose={() => setMessage(null)}
@@ -115,18 +116,18 @@ function SettingsComponent() {
                                 <Row className="g-3">
                                     {Object.values(themes).map((theme) => (
                                         <Col key={theme.id} xs={12} sm={6} md={4} lg={3}>
-                                            <Card 
+                                            <Card
                                                 className={`h-100 ${themeState.currentTheme.id === theme.id ? 'border-primary border-3' : ''}`}
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => handleThemeChange(theme.id)}
                                             >
-                                                <div 
+                                                <div
                                                     style={getThemePreviewStyle(theme)}
                                                     className="position-relative"
                                                 >
                                                     {/* Theme Preview Content */}
                                                     <div className="position-absolute top-50 start-50 translate-middle text-center">
-                                                        <div 
+                                                        <div
                                                             className="rounded-circle mx-auto mb-2"
                                                             style={{
                                                                 width: '30px',
@@ -134,7 +135,7 @@ function SettingsComponent() {
                                                                 backgroundColor: theme.colors.primary,
                                                             }}
                                                         ></div>
-                                                        <div 
+                                                        <div
                                                             className="rounded mx-auto"
                                                             style={{
                                                                 width: '40px',

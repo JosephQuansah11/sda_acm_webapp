@@ -59,8 +59,8 @@ export const mockUsers: User[] = [
 export const mockAuthService = {
     // Simulate login with 2FA
     async login(credentials: LoginCredentials): Promise<{ user?: User; token?: string; requiresVerification?: boolean; verificationState?: VerificationState }> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // // Simulate network delay
+        // await new Promise(resolve => setTimeout(resolve, 1000));
 
         const { identifier, password, identifierType } = credentials;
 
@@ -107,8 +107,8 @@ export const mockAuthService = {
 
     // Complete login after verification
     async completeLogin(tempToken: string): Promise<{ user: User; token: string }> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // // Simulate network delay
+        // await new Promise(resolve => setTimeout(resolve, 500));
 
         // Extract user ID from temp token
         const tokenParts = tempToken.split('-');
@@ -146,8 +146,8 @@ export const mockAuthService = {
 
     // Simulate profile update
     async updateProfile(userId: number, updates: Partial<User>): Promise<User> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // // Simulate network delay
+        // await new Promise(resolve => setTimeout(resolve, 800));
 
         const userIndex = mockUsers.findIndex(u => u.id === userId);
         if (userIndex === -1) {
@@ -161,8 +161,8 @@ export const mockAuthService = {
 
     // Simulate preferences update
     async updatePreferences(userId: number, preferences: any): Promise<{ message: string }> {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // // Simulate network delay
+        // await new Promise(resolve => setTimeout(resolve, 500));
 
         const userIndex = mockUsers.findIndex(u => u.id === userId);
         if (userIndex === -1) {

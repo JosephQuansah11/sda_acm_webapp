@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { mockAuthService, mockUsers } from './mockAuthService';
 
@@ -69,19 +69,35 @@ mock.onPost('/api/user/profile').reply(async (config) => {
 
 mock.onPut('/api/user/preferences').reply(async (config) => {
   try {
-    const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
-    console.log(token);
-    const user = await mockAuthService.updatePreferences(token, config.data);
-    const updatedUser = { ...user, ...config.data };
+    const config_data = JSON.parse(config.data);
+    const token =(config_data.headers.Authorization.replace('Bearer ', '') || '');
+    const user = await mockAuthService.validateToken(token);
+    const requestedTheme = JSON.parse(config_data.data).theme;
+    user.profile!.preferences!.theme = requestedTheme;
+    await mockAuthService.updatePreferences(user.id, user.profile!.preferences!);
+    const updatedUser = { ...user, ...config_data.data };
     return [200, updatedUser];
   } catch (error) {
     return [401, { message: (error as Error).message }];
   }
 });
 
+mock.onGet('/api/user/preferences').reply((config) => {
+  const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
+  const user = mockAuthService.validateToken(token);
+  console.log("user ",user);
+  return [200, user];
+});
+
+mock.onGet('/api/user/profile').reply((config) => {
+  const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
+  const user = mockAuthService.validateToken(token);
+  return [200, user];
+});
+
 mock.onGet('/api/users').reply(async () => {
   try {
-    const user = mockAuthService.getDemoCredentials();
+    const user = mockUsers;
     return [200, user];
   } catch (error) {
     return [401, { message: (error as Error).message }];

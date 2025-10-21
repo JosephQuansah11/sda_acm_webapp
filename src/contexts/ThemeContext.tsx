@@ -1,5 +1,8 @@
-import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
 import axiosInstance from '../api/authPromise';
+import { AxiosResponse } from 'axios';
+import { User } from './AuthContext';
+
 
 // Theme types and interfaces
 export interface ThemeColors {
@@ -239,19 +242,38 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         }
     };
 
-    // Load saved theme on mount
+    
+    // Check and Load theme for existing session on mount
     useEffect(() => {
-        const savedTheme = localStorage.getItem('selectedTheme');
-        if (savedTheme && themes[savedTheme]) {
-            dispatch({ type: 'SET_THEME', payload: savedTheme });
-        }
+        const checkExistingSession = async () => {
+            let theme = localStorage.getItem('selectedTheme');
+            const token = localStorage.getItem('authToken');
+
+            if (!theme && token) {
+                try {
+                    const response: AxiosResponse<User> = await axiosInstance.get('/api/user/preferences', {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+                    theme = response!.data!.profile!.preferences!.theme!
+                } catch (error: any) {
+                    console.error(error);
+                }
+            }
+            state.currentTheme.id = theme!;
+            applyThemeToDOM();
+        };
+
+        checkExistingSession();
     }, []);
 
-    // Apply theme whenever it changes
+
+
     useEffect(() => {
-        applyThemeToDOM();
         localStorage.setItem('selectedTheme', state.currentTheme.id);
-    }, [state.currentTheme]);
+        applyThemeToDOM();
+    }, [state.currentTheme.id]);
 
     // Set theme function
     const setTheme = async (themeId: string) => {
@@ -261,7 +283,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         try {
             const token = localStorage.getItem('authToken');
             if (token) {
-                await axiosInstance.put('/api/user/preferences', {
+                axiosInstance.put('/api/user/preferences', {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('authToken')}`,

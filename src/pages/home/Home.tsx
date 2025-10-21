@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { withRequireAuth } from '../../security/withAuth';
 import { StatCard } from '../../components/common/StatCard';
 import { QuickStartGuide } from '../../components/QuickStartGuide';
 import '../../App.scss';

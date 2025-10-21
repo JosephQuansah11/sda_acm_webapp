@@ -43,8 +43,8 @@ function generateVerificationCode(): string {
 async function sendEmailCode(email: string, code: string): Promise<boolean> {
      // console.log(`📧 Sending verification code to ${email}: ${code}`);
     
-    // Simulate email sending delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // // Simulate email sending delay
+    // await new Promise(resolve => setTimeout(resolve, 1000));
     
     // In production, integrate with email service (SendGrid, AWS SES, etc.)
     // For demo, we'll show the code in console and browser notification
