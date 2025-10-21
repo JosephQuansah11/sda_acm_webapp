@@ -1,6 +1,6 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { mockAuthService, mockUsers } from './mockAuthService';
+import { mockAuthService } from './mockAuthService';
 
 const axiosInstance = axios.create();
 const mock = new MockAdapter(axiosInstance);
@@ -20,6 +20,7 @@ mock.onPost('/api/auth/complete-login').reply(async (config) => {
   try {
     const tempToken = JSON.parse(config.data).tempToken;
     const result = await mockAuthService.completeLogin(tempToken);
+    console.log(result);
     return [200, result];
   } catch (error) {
     return [401, { message: (error as Error).message }];
@@ -29,6 +30,7 @@ mock.onPost('/api/auth/complete-login').reply(async (config) => {
 mock.onPost('/api/auth/validate').reply(async (config) => {
   try {
     const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
+    console.log(" on post validate", token );
     const user = await mockAuthService.validateToken(token);
     return [200, user];
   } catch (error) {
@@ -40,6 +42,7 @@ mock.onGet('/api/auth/validate').reply(async (config) => {
   try {
     const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
     const user = await mockAuthService.validateToken(token);
+    console.log(" on get validate", token , user);
     return [200, user];
   } catch (error) {
     return [401, { message: (error as Error).message }];
@@ -93,15 +96,6 @@ mock.onGet('/api/user/profile').reply((config) => {
   const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
   const user = mockAuthService.validateToken(token);
   return [200, user];
-});
-
-mock.onGet('/api/users').reply(async () => {
-  try {
-    const user = mockUsers;
-    return [200, user];
-  } catch (error) {
-    return [401, { message: (error as Error).message }];
-  }
 });
 
 export const authService = mockAuthService;

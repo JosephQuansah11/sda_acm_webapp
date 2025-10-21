@@ -4,9 +4,10 @@ import type { AxiosResponse } from 'axios';
 
 // User types and interfaces
 export interface User {
-    id: number;
+    id: string;
     email?: string;
     telephone?: string;
+    password?: string;
     name: string;
     role: 'admin' | 'user' | 'moderator';
     profile?: {
@@ -150,7 +151,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const checkExistingSession = async () => {
             const token = localStorage.getItem('authToken');
             const loginMethod = localStorage.getItem('loginMethod') as 'custom' | 'keycloak' | null;
-
+            console.log("token", token);
+            console.log("loginMethod", loginMethod);
             if (token && loginMethod) {
                 dispatch({ type: 'AUTH_START' });
                 try {
@@ -159,6 +161,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                             Authorization: `Bearer ${token}`,
                         },
                     });
+                    console.log("on validate", response.data);
                     dispatch({
                         type: 'AUTH_SUCCESS',
                         payload: { user: response.data, method: loginMethod },
@@ -171,7 +174,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 }
             }
         };
-
         checkExistingSession();
     }, []);
 
@@ -198,6 +200,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
             // For Keycloak or successful verification, proceed with normal login
             if (response.data.user && response.data.token) {
+                console.log("saving token and method")
                 // Store token and method
                 localStorage.setItem('authToken', response.data.token);
                 localStorage.setItem('loginMethod', method);

@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Form, Button, Alert, Tab, Tabs } from 'react
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, LoginCredentials } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { DemoCredentials } from '../../components/DemoCredentials';
+// import { DemoCredentials } from '../../components/DemoCredentials';
 import { VerificationCodeInput } from '../../components/VerificationCodeInput';
 
 interface LocationState {
@@ -157,7 +157,7 @@ export default function LoginPage() {
                                 </Alert>
                             )}
 
-                            <DemoCredentials />
+                            {/* <DemoCredentials /> */}
 
                             <Tabs
                                 activeKey={activeTab}

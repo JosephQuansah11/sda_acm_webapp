@@ -1,59 +1,27 @@
 import { LoginCredentials, User, VerificationState } from '../contexts/AuthContext';
 import { verificationService } from './verificationService';
 import avatar from '../images/7960899(1).jpg';
-
+import { getAllUsers } from './UserApi';
+import { getLoginPasswordEncoded } from './UserApi';
+import { useCallback, useEffect } from 'react';
 
 const adminAvatar = 'https://media.tenor.com/xqStQSFQotIAAAAm/cute-eyes-aang.webp';
 const moderatorAvatar = 'https://media.tenor.com/hD5dujWbbq0AAAAm/really-zhao.webp';
 
+let initialApiUsers: User[] = [];
+
+async function getMockUsers() {
+    const users = await getAllUsers();
+    users.forEach(user => {
+        initialApiUsers.push(user as unknown as User);
+    });
+    return users;
+}
+getMockUsers();
+
 // Mock users for testing
-export const mockUsers: User[] = [
-    {
-        id: 1,
-        email: 'admin@sda.com',
-        name: 'John Administrator',
-        role: 'admin',
-        profile: {
-            firstName: 'John',
-            lastName: 'Administrator',
-            avatar: adminAvatar,
-            preferences: {
-                theme: 'default',
-                notifications: true,
-            },
-        },
-    },
-    {
-        id: 2,
-        telephone: '+1234567890',
-        name: 'Jane Moderator',
-        role: 'moderator',
-        profile: {
-            firstName: 'Jane',
-            lastName: 'Moderator',
-            avatar: moderatorAvatar,
-            preferences: {
-                theme: 'ocean',
-                notifications: false,
-            },
-        },
-    },
-    {
-        id: 3,
-        email: 'user@sda.com',
-        name: 'Bob User',
-        role: 'user',
-        profile: {
-            firstName: 'Bob',
-            lastName: 'User',
-            avatar: avatar,
-            preferences: {
-                theme: 'dark',
-                notifications: true,
-            },
-        },
-    },
-];
+export const mockUsers: User[] = initialApiUsers;
+
 
 // Mock authentication service
 export const mockAuthService = {
@@ -65,19 +33,14 @@ export const mockAuthService = {
         const { identifier, password, identifierType } = credentials;
 
         // Find user by email or phone
-        const user = mockUsers.find(u => {
-            if (identifierType === 'email') {
-                return u.email === identifier;
-            } else {
-                return u.telephone === identifier;
-            }
-        });
+        const user = mockUsers.find(u => u.email === identifier || u.telephone === identifier);
+        const encodedPassword = await getLoginPasswordEncoded(credentials.identifierType === 'email' ? credentials.identifier : identifier as string, password);
 
         // Simple password check (in real app, this would be hashed)
-        if (user && password === 'password123') {
+        if (user && encodedPassword === user.password) {
             // For custom login, require 2FA verification
             const verificationType = identifierType === 'email' ? 'email' : 'sms';
-            
+
             // Send verification code
             const verificationResponse = await verificationService.sendVerificationCode({
                 identifier,
@@ -112,10 +75,18 @@ export const mockAuthService = {
 
         // Extract user ID from temp token
         const tokenParts = tempToken.split('-');
+        console.log(tokenParts)
         if (tokenParts.length >= 4 && tokenParts[0] === 'temp' && tokenParts[1] === 'token') {
-            const userId = parseInt(tokenParts[2]);
-            const user = mockUsers.find(u => u.id === userId);
-            
+            const deducedUserId = tokenParts.reduce((acc, part, index) => {
+                if (index >= 2 && index <= tokenParts.length - 2) {
+                    return acc + part + (index >= 2 && index <= tokenParts.length - 3 ? '-' : '');
+                }
+                return acc;
+            }, '');
+            console.log(deducedUserId)
+            const userId = deducedUserId;
+            const user = mockUsers.find((u: User) => u.id == userId);
+
             if (user) {
                 const token = `mock-jwt-token-${user.id}-${Date.now()}`;
                 return { user, token };
@@ -133,9 +104,15 @@ export const mockAuthService = {
         // Extract user ID from mock token
         const tokenParts = token.split('-');
         if (tokenParts.length >= 4 && tokenParts[0] === 'mock' && tokenParts[1] === 'jwt' && tokenParts[2] === 'token') {
-            const userId = parseInt(tokenParts[3]);
-            const user = mockUsers.find(u => u.id === userId);
-            
+            const deducedUserId = tokenParts.reduce((acc, part, index) => {
+                if (index >= 2 && index <= tokenParts.length - 2) {
+                    return acc + part + (index >= 2 && index <= tokenParts.length - 3 ? '-' : '');
+                }
+                return acc;
+            }, '');
+            const userId = deducedUserId;
+            const user = mockUsers.find((u: User) => u.id == userId);
+
             if (user) {
                 return user;
             }
@@ -145,11 +122,11 @@ export const mockAuthService = {
     },
 
     // Simulate profile update
-    async updateProfile(userId: number, updates: Partial<User>): Promise<User> {
+    async updateProfile(userId: string, updates: Partial<User>): Promise<User> {
         // // Simulate network delay
         // await new Promise(resolve => setTimeout(resolve, 800));
 
-        const userIndex = mockUsers.findIndex(u => u.id === userId);
+        const userIndex = mockUsers.findIndex((u: User) => u.id === userId);
         if (userIndex === -1) {
             throw new Error('User not found');
         }
@@ -160,7 +137,7 @@ export const mockAuthService = {
     },
 
     // Simulate preferences update
-    async updatePreferences(userId: number, preferences: any): Promise<{ message: string }> {
+    async updatePreferences(userId: string, preferences: any): Promise<{ message: string }> {
         // // Simulate network delay
         // await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -180,24 +157,5 @@ export const mockAuthService = {
         return { message: 'Preferences updated successfully' };
     },
 
-    // Get demo credentials for testing
-    getDemoCredentials() {
-        return {
-            admin: {
-                email: 'admin@sda.com',
-                password: 'password123',
-                name: 'John Administrator'
-            },
-            moderator: {
-                phone: '+1234567890',
-                password: 'password123',
-                name: 'Jane Moderator'
-            },
-            user: {
-                email: 'user@sda.com',
-                password: 'password123',
-                name: 'Bob User'
-            }
-        };
-    }
 };
+

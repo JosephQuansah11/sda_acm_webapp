@@ -18,7 +18,6 @@ export function useUserContent() {
         const fetchUsers = async () => {
             try {
                 const response = await getAllUsers();
-                 // console.log(response);
                 setUsers(response);
                 setLoading(false);
             } catch (error) {

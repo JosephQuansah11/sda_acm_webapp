@@ -1,10 +1,10 @@
 import User, { UserForm } from "../models/user/User";
-import axiosInstance from "./authPromise";
+import axios from "axios";
 
 export async function editUserById(id: string, user: User): Promise<User> {
     // console.log("editUserById function calls: ", user);
     try {
-        const response = await axiosInstance.put(`/api/users/${id}`, {
+        const response = await axios.put(`/api/users/${id}`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -23,12 +23,32 @@ export async function editUserById(id: string, user: User): Promise<User> {
     }
 }
 
-export async function getAllUsers(): Promise<User[]> {
+export async function getLoginPasswordEncoded(email: string, password: string): Promise<string>{
     try {
-        const response = await axiosInstance.get('/api/users', {
+        const response = await axios.get(`http://localhost:8080/users/loginPasswordEncoded/${email}/${password}`, {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `bearer ${localStorage.getItem('authToken')}`
+                // 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+        });
+
+        if (response.status !== 200) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+export async function getAllUsers(): Promise<User[]> {
+    try {
+        const response = await axios.get('http://localhost:8080/users/all', {
+            headers: {
+                'Content-Type': 'application/json',
+                // 'Authorization': `bearer ${localStorage.getItem('authToken')}`
             }
         });
 
@@ -45,7 +65,7 @@ export async function getAllUsers(): Promise<User[]> {
 
 export async function addUser(user: UserForm): Promise<UserForm> {
     try {
-        const response = await axiosInstance.post('/api/users', {
+        const response = await axios.post('http://localhost:8080/users', {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('authToken')}`
@@ -66,7 +86,7 @@ export async function addUser(user: UserForm): Promise<UserForm> {
 
 export async function deleteUser(userId: string): Promise<void> {
     try {
-        const response = await axiosInstance.delete(`/api/users/${userId}`, {
+        const response = await axios.delete(`http://localhost:8080/users/${userId}`, {
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('authToken')}`
@@ -86,7 +106,7 @@ export async function deleteUser(userId: string): Promise<void> {
 
 export async function getUserDetail(userId: string): Promise<User> {
     try {
-        const response = await axiosInstance.get(`/api/users/${userId}`, {
+        const response = await axios.get(`http://localhost:8080/users/${userId}`, {
             headers: {
                 'Accept': 'application/json',
                 'Authorization': `bearer ${localStorage.getItem('authToken')}`
