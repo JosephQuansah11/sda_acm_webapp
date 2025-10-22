@@ -105,8 +105,8 @@ export const mockAuthService = {
         const tokenParts = token.split('-');
         if (tokenParts.length >= 4 && tokenParts[0] === 'mock' && tokenParts[1] === 'jwt' && tokenParts[2] === 'token') {
             const deducedUserId = tokenParts.reduce((acc, part, index) => {
-                if (index >= 2 && index <= tokenParts.length - 2) {
-                    return acc + part + (index >= 2 && index <= tokenParts.length - 3 ? '-' : '');
+                if (index >= 3 && index <= tokenParts.length - 2) {
+                    return acc + part + (index >= 3 && index <= tokenParts.length - 3 ? '-' : '');
                 }
                 return acc;
             }, '');

@@ -3,7 +3,6 @@ import { Container, Row, Col, Card, Form, Button, Alert, Tab, Tabs } from 'react
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, LoginCredentials } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-// import { DemoCredentials } from '../../components/DemoCredentials';
 import { VerificationCodeInput } from '../../components/VerificationCodeInput';
 
 interface LocationState {
@@ -109,7 +108,7 @@ export default function LoginPage() {
     // Handle verification success
     const handleVerificationSuccess = async () => {
         try {
-            await completeVerification();
+            completeVerification();
             // Navigation will be handled by useEffect when authentication succeeds
         } catch (error) {
             console.error('Verification completion failed:', error);
@@ -156,8 +155,6 @@ export default function LoginPage() {
                                     {state.error}
                                 </Alert>
                             )}
-
-                            {/* <DemoCredentials /> */}
 
                             <Tabs
                                 activeKey={activeTab}

@@ -151,8 +151,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const checkExistingSession = async () => {
             const token = localStorage.getItem('authToken');
             const loginMethod = localStorage.getItem('loginMethod') as 'custom' | 'keycloak' | null;
-            console.log("token", token);
-            console.log("loginMethod", loginMethod);
+            
             if (token && loginMethod) {
                 dispatch({ type: 'AUTH_START' });
                 try {
@@ -161,7 +160,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
                             Authorization: `Bearer ${token}`,
                         },
                     });
-                    console.log("on validate", response.data);
                     dispatch({
                         type: 'AUTH_SUCCESS',
                         payload: { user: response.data, method: loginMethod },
