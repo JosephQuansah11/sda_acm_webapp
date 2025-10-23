@@ -1,12 +1,12 @@
 import User, { UserForm } from "../../models/user/User";
 import { useEffect, useState, useMemo } from "react";
-import { getAllUsers, addUser, deleteUser, editUserById } from "../../api/UserApi";
+import { getAllUsers, addUser, deleteUser, editUserById, getTotalMembers } from "../../api/UserApi";
 
 export function useUserContent() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    
+    const [totalMembers, setTotalMembers] = useState<number>(0);
     // Memoize configuration arrays to prevent unnecessary re-renders
     const displayKeys = useMemo(() => ['name', 'email', 'telephone', 'address'], []);
     const searchableKeys = useMemo(() => [
@@ -19,6 +19,7 @@ export function useUserContent() {
             try {
                 const response = await getAllUsers();
                 setUsers(response);
+                // setTotalMembers(response.length);
                 setLoading(false);
             } catch (error) {
                 setError(error as string);
@@ -28,6 +29,19 @@ export function useUserContent() {
         fetchUsers();
     }, []);
 
+    useEffect(() => {
+        const fetchTotalMembers = async () => {
+            try {
+                const response = await getTotalMembers();
+                setTotalMembers(response);
+            } catch (error) {
+                setError(error as string);
+            }
+        };
+        fetchTotalMembers();
+    }, []);
+
+
     // Memoize the return object to prevent unnecessary re-renders
     return useMemo(() => ({
         users,
@@ -35,8 +49,9 @@ export function useUserContent() {
         error,
         displayKeys,
         searchableKeys,
-        innerObjectKeys
-    }), [users, loading, error, displayKeys, searchableKeys, innerObjectKeys]);
+        innerObjectKeys,
+        totalMembers
+    }), [users, loading, error, displayKeys, searchableKeys, innerObjectKeys, totalMembers]);
 }
 
 

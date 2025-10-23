@@ -1,12 +1,9 @@
-import { LoginCredentials, User, VerificationState } from '../contexts/AuthContext';
+import { LoginCredentials, VerificationState } from '../contexts/AuthContext';
 import { verificationService } from './verificationService';
-import avatar from '../images/7960899(1).jpg';
 import { getAllUsers } from './UserApi';
 import { getLoginPasswordEncoded } from './UserApi';
-import { useCallback, useEffect } from 'react';
+import User from '../models/user/User';
 
-const adminAvatar = 'https://media.tenor.com/xqStQSFQotIAAAAm/cute-eyes-aang.webp';
-const moderatorAvatar = 'https://media.tenor.com/hD5dujWbbq0AAAAm/really-zhao.webp';
 
 let initialApiUsers: User[] = [];
 
@@ -83,9 +80,9 @@ export const mockAuthService = {
                 }
                 return acc;
             }, '');
-            console.log(deducedUserId)
+
             const userId = deducedUserId;
-            const user = mockUsers.find((u: User) => u.id == userId);
+            const user = mockUsers.find((u: User) => String(u.id) == userId);
 
             if (user) {
                 const token = `mock-jwt-token-${user.id}-${Date.now()}`;
@@ -111,7 +108,7 @@ export const mockAuthService = {
                 return acc;
             }, '');
             const userId = deducedUserId;
-            const user = mockUsers.find((u: User) => u.id == userId);
+            const user = mockUsers.find((u: User) => String(u.id) == userId);
 
             if (user) {
                 return user;
@@ -126,7 +123,7 @@ export const mockAuthService = {
         // // Simulate network delay
         // await new Promise(resolve => setTimeout(resolve, 800));
 
-        const userIndex = mockUsers.findIndex((u: User) => u.id === userId);
+        const userIndex = mockUsers.findIndex((u: User) => String(u.id) === userId);
         if (userIndex === -1) {
             throw new Error('User not found');
         }
@@ -141,7 +138,7 @@ export const mockAuthService = {
         // // Simulate network delay
         // await new Promise(resolve => setTimeout(resolve, 500));
 
-        const userIndex = mockUsers.findIndex(u => u.id === userId);
+        const userIndex = mockUsers.findIndex(u => String(u.id) === userId);
         if (userIndex === -1) {
             throw new Error('User not found');
         }

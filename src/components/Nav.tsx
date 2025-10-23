@@ -27,9 +27,10 @@ export function CustomNav() {
         logout();
         navigate('/login');
     };
+    console.log(state.user?.profile.avatar);
 
     if (!state?.user?.profile?.avatar) {
-        state!.user!.profile!.avatar = "./images/2149548010.jpg";
+        state!.user!.profile!.avatar = "../images/2149548010.jpg";
     }
 
     return (
@@ -60,15 +61,15 @@ export function CustomNav() {
                 {/* User Profile Section */}
                 {state.isAuthenticated && state.user && (
                     <div className="d-flex flex-column align-items-center mb-3">
-                        <Dropdown drop="end">
+                        <Dropdown drop="up">
                             <Dropdown.Toggle
                                 variant="link"
                                 className="text-light p-0 border-0 shadow-none"
                                 style={{ background: 'none' }}
                             >
-                                <OverlayTrigger placement="right" overlay={<Tooltip>Profile Menu</Tooltip>}>
+                                <OverlayTrigger placement="top" overlay={<Tooltip>Profile Menu</Tooltip>}>
                                     <div className="d-flex flex-column align-items-center">
-                                        {state.user.profile?.avatar ? (
+                                        {state.user.profile.avatar ? (
                                             <img
                                                 src={state.user.profile.avatar}
                                                 alt="Profile"
@@ -86,7 +87,7 @@ export function CustomNav() {
                                             </div>
                                         )}
                                         <small className="text-truncate" style={{ maxWidth: '60px', fontSize: '0.7rem' }}>
-                                            {state.user.name}
+                                            {state.user.userName}
                                         </small>
                                     </div>
                                 </OverlayTrigger>
@@ -95,7 +96,7 @@ export function CustomNav() {
                             <Dropdown.Menu>
                                 <Dropdown.Header>
                                     <div className="text-center">
-                                        <strong>{state.user.name}</strong>
+                                        <strong>{state.user.userName}</strong>
                                         <br />
                                         <small className="text-muted">{state.user.role}</small>
                                     </div>

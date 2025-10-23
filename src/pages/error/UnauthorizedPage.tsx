@@ -1,4 +1,3 @@
-import React from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -37,7 +36,7 @@ export default function UnauthorizedPage() {
                             {state.user && (
                                 <div className="bg-light rounded p-3 mb-4">
                                     <small className="text-muted">
-                                        <strong>Current User:</strong> {state.user.name}<br />
+                                        <strong>Current User:</strong> {state.user.userName}<br />
                                         <strong>Role:</strong> {state.user.role}
                                     </small>
                                 </div>

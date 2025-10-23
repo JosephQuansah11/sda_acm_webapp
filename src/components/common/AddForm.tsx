@@ -97,6 +97,7 @@ export function AddForm<T extends FormBaseEntity>({ items, onSubmit, buttonName 
         if (form.checkValidity()) {
             // Generic submission - call the provided onSubmit handler
             if (onSubmit) {
+                console.log('Form object:', formObject);
                 onSubmit(formObject);
             } else {
                 // Fallback for UserForm if no onSubmit provided

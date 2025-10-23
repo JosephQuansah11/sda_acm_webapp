@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { LoginCredentials, User } from '../contexts/AuthContext';
+import { LoginCredentials } from '../contexts/AuthContext';
+import User from '../models/user/User';
 
 // Create axios instance with base configuration
 const authApi = axios.create({

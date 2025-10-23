@@ -10,9 +10,10 @@ import User from "../../models/user/User";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorAlert } from "./ErrorAlert";
 import '../../App.scss';
+import { usePermissions } from '../../security/withAuth';
 
 interface ListViewProps<T extends BaseEntity> {
-    hook: () => { users: T[], loading: boolean, error: string|null, displayKeys: string[], searchableKeys: string[], innerObjectKeys: string[] };
+    hook: () => { users: T[], loading: boolean, error: string | null, displayKeys: string[], searchableKeys: string[], innerObjectKeys: string[] };
     onEdit?: (item: T) => void;
     onDelete?: (id: string) => void;
     filterOptions?: FilterOption[];
@@ -20,10 +21,10 @@ interface ListViewProps<T extends BaseEntity> {
     pageSizeOptions?: number[];
 }
 
-export function ListView<T extends BaseEntity>({ 
-    hook, 
-    onEdit, 
-    onDelete, 
+export function ListView<T extends BaseEntity>({
+    hook,
+    onEdit,
+    onDelete,
     filterOptions,
     initialPageSize = 10,
     pageSizeOptions = [5, 10, 25, 50, 100]
@@ -38,22 +39,23 @@ export function ListView<T extends BaseEntity>({
         sortColumn: null,
         sortDirection: null
     });
+    const { canAccess } = usePermissions();
     // Use modal management hook
     const modalManager = useModalManager<T>();
-    
+
     // Memoize columns to prevent unnecessary re-renders
-    const columns = useMemo(() => 
+    const columns = useMemo(() =>
         displayKeys.map(key => ({
             key,
             label: key.charAt(0).toUpperCase() + key.slice(1)
         })), [displayKeys]
     );
-    
+
     // Handle processed data from TableControls
     const handleDataProcessed = useCallback((data: ProcessedData<T>) => {
         setProcessedData(data);
     }, []); // Empty dependency array since setProcessedData is stable
-    
+
     // Memoize sort icon function
     const getSortIcon = useCallback((column: string) => {
         if (processedData.sortColumn !== column) return '↕️';
@@ -85,10 +87,10 @@ export function ListView<T extends BaseEntity>({
         }
         modalManager.closeDeleteModal();
     }, [modalManager.deletingItem, modalManager.closeDeleteModal, onDelete]);
-    
+
     // Memoize edit submission handler
     const handleEditSubmit = useCallback((updatedItem: T & BaseEntity) => {
-         // console.log('Updated item:', updatedItem);
+        // console.log('Updated item:', updatedItem);
         EditUserContent(updatedItem.id as unknown as string, updatedItem as unknown as User);
 
         // Handle update logic here
@@ -102,7 +104,7 @@ export function ListView<T extends BaseEntity>({
                 data={users}
                 searchableKeys={searchableKeys}
                 onDataProcessed={handleDataProcessed}
-                searchPlaceholder={useMemo(() => 
+                searchPlaceholder={useMemo(() =>
                     `Search ${columns.length > 0 ? columns.map((c: any) => c.label.toLowerCase()).join(', ') : 'items'}...`,
                     [columns]
                 )}
@@ -115,22 +117,24 @@ export function ListView<T extends BaseEntity>({
 
             {loading && <LoadingSpinner text="Loading data..." />}
             <ErrorAlert error={error} />
-            
-            <Table variant="primary" striped hover summary="users table"  title="User's Data"  >
+
+            <Table variant="primary" striped hover summary="users table" title="User's Data"  >
                 <thead>
                     <tr>
                         {columns.map((column) => (
-                            <th 
-                                key={column.key} 
+                            <th
+                                key={column.key}
                                 style={{ cursor: 'pointer', userSelect: 'none' }}
                                 onClick={() => handleSort(column.key)}
                                 className="position-relative"
                             >
-                                {column.label} 
+                                {column.label}
                                 <span className="ms-1">{getSortIcon(column.key)}</span>
                             </th>
                         ))}
-                        <th colSpan={2} className="text-center">Manage</th>
+                        {canAccess(['ADMIN', 'MODERATOR']) && (
+                            <th colSpan={2} className="text-center">Manage</th>
+                        )}
                     </tr>
                 </thead>
                 <tbody>
@@ -145,27 +149,28 @@ export function ListView<T extends BaseEntity>({
                                             return innerObjectKeys.map((key: any) => value[key] + ' ');
                                         }
                                         return String(value || '');
-                                    })()} 
+                                    })()}
                                 </td>
                             ))}
-                            <td>
-                                <Button 
-                                    variant="primary" 
-                                    size="sm"
-                                    onClick={() => handleEdit(item)}
-                                >
-                                    Edit
-                                </Button>
-                            </td>
-                            <td>
-                                <Button 
-                                    variant="danger" 
-                                    size="sm"
-                                    onClick={() => handleDelete(item)}
-                                >
-                                    Delete
-                                </Button>
-                            </td>
+                            {canAccess(['ADMIN', 'MODERATOR']) && (
+                                <>
+                                    <td>
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => handleEdit(item)}>
+                                            Edit
+                                        </Button>
+                                    </td><td>
+                                        <Button
+                                            variant="danger"
+                                            size="sm"
+                                            onClick={() => handleDelete(item)}>
+                                            Delete
+                                        </Button>
+                                    </td>
+                                </>
+                            )}
                         </tr>
                     ))}
                 </tbody>

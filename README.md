@@ -100,7 +100,7 @@ export default withAdminOnly(AdminComponent);
 // Custom Protection
 export default withAuth(MyComponent, {
     requireAuth: true,
-    requiredRoles: ['admin', 'moderator'],
+    requiredRoles: ['ADMIN', 'MODERATOR'],
     redirectTo: '/unauthorized'
 });
 ```
@@ -110,7 +110,7 @@ export default withAuth(MyComponent, {
 const { canAccess, isAdmin, checkPermission } = usePermissions();
 
 // Usage
-if (canAccess(['admin', 'moderator'])) {
+if (canAccess(['ADMIN', 'MODERATOR'])) {
     // Show admin/moderator features
 }
 ```

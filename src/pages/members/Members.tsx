@@ -18,7 +18,7 @@ const filterOptions = [
     {
         key: 'role',
         label: 'Role',
-        values: ['admin', 'moderator', 'user']
+        values: ['ADMIN', 'MODERATOR', 'USER']
     }
 ];
 
@@ -30,7 +30,7 @@ export default function Members() {
 
     const handleUserEdit = (user: User) => {
         // Check if user can edit other users
-        if (!canAccess(['admin', 'moderator'])) {
+        if (!canAccess(['ADMIN', 'MODERATOR'])) {
             setMessage({ 
                 type: 'error', 
                 text: 'You do not have permission to edit user profiles.' 
@@ -41,7 +41,7 @@ export default function Members() {
          // console.log('Editing user:', user);
         setMessage({ 
             type: 'success', 
-            text: `Editing profile for ${user.name}` 
+            text: `Editing profile for ${user.userName}` 
         });
     };
     
@@ -64,7 +64,7 @@ export default function Members() {
     };
 
     const handleAddNewMember = () => {
-        if (!canAccess(['admin', 'moderator'])) {
+        if (!canAccess(['ADMIN', 'MODERATOR'])) {
             setMessage({ 
                 type: 'error', 
                 text: 'You do not have permission to add new members.' 
@@ -83,8 +83,8 @@ export default function Members() {
 
     const getRoleBadgeVariant = (role: string) => {
         switch (role) {
-            case 'admin': return 'danger';
-            case 'moderator': return 'warning';
+            case 'ADMIN': return 'danger';
+            case 'MODERATOR': return 'warning';
             default: return 'primary';
         }
     };
@@ -107,11 +107,11 @@ export default function Members() {
                                     </p>
                                 </div>
                                 <div className="text-end">
-                                    <Badge bg={getRoleBadgeVariant(state.user?.role || 'user')} className="fs-6 mb-2">
+                                    <Badge bg={getRoleBadgeVariant(state.user?.role || 'USER')} className="fs-6 mb-2">
                                         {state.user?.role?.toUpperCase()}
                                     </Badge>
                                     <br />
-                                    {canAccess(['admin', 'moderator']) && (
+                                    {canAccess(['ADMIN', 'MODERATOR']) && (
                                         <Button 
                                             variant="primary" 
                                             size="sm"
@@ -152,12 +152,12 @@ export default function Members() {
                                 <i className="bi bi-info-circle me-2"></i>
                                 <strong>Your Permissions:</strong>
                                 {isAdmin && <Badge bg="danger" className="ms-2">Full Access</Badge>}
-                                {canAccess(['moderator']) && !isAdmin && <Badge bg="warning" className="ms-2">Edit Members</Badge>}
-                                {!canAccess(['admin', 'moderator']) && <Badge bg="secondary" className="ms-2">View Only</Badge>}
+                                {canAccess(['MODERATOR']) && !isAdmin && <Badge bg="warning" className="ms-2">Edit Members</Badge>}
+                                {!canAccess(['ADMIN', 'MODERATOR']) && <Badge bg="secondary" className="ms-2">View Only</Badge>}
                                 <span className="ms-3">
-                                    Can Edit: {canAccess(['admin', 'moderator']) ? '✅' : '❌'} | 
+                                    Can Edit: {canAccess(['ADMIN', 'MODERATOR']) ? '✅' : '❌'} | 
                                     Can Delete: {isAdmin ? '✅' : '❌'} | 
-                                    Can Add: {canAccess(['admin', 'moderator']) ? '✅' : '❌'}
+                                    Can Add: {canAccess(['ADMIN', 'MODERATOR']) ? '✅' : '❌'}
                                 </span>
                             </small>
                         </Card.Body>

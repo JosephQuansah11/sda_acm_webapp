@@ -14,7 +14,7 @@ import { withRequireAuth } from './security/withAuth';
 // Import mock service for demo purposes
 import './api/authPromise';
 import AddMember from './pages/members/AddMember';
-
+import SignUpPage from './pages/auth/SignUpPage';
 // Protected layout component
 function ProtectedLayout() {
   return (
@@ -45,6 +45,7 @@ function AppContent() {
       {/* Public routes */}
       <Route path='/login' element={<LoginPage />} />
       <Route path='/unauthorized' element={<UnauthorizedPage />} />
+      <Route path='/register' element={<SignUpPage />} />
 
       {/* Protected routes */}
       <Route path='/*' element={<AuthenticatedLayout />} />

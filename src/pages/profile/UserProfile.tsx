@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Badge, Tab, Tabs, Modal, Spinner } from 'react-bootstrap';
-import { useAuth, User } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { withRequireAuth } from '../../security/withAuth';
-import { PageHeader, LoadingSpinner, ErrorAlert } from '../../components/common';
+import { PageHeader } from '../../components/common';
+import User from '../../models/user/User';
 
 function UserProfileComponent() {
     const { state, updateUser } = useAuth();
@@ -19,7 +20,7 @@ function UserProfileComponent() {
     });
     
     const [formData, setFormData] = useState({
-        name: state.user?.name || '',
+        name: state.user?.userName || '',
         email: state.user?.email || '',
         telephone: state.user?.telephone || '',
         firstName: state.user?.profile?.firstName || '',
@@ -46,7 +47,7 @@ function UserProfileComponent() {
         try {
             // Prepare updated user data
             const updatedUser: Partial<User> = {
-                name: formData.name,
+                userName: formData.name,
                 email: formData.email,
                 telephone: formData.telephone,
                 profile: {
@@ -54,6 +55,7 @@ function UserProfileComponent() {
                     lastName: formData.lastName,
                     avatar: formData.avatar,
                     preferences: {
+                        language: "EN",
                         theme: state.user?.profile?.preferences?.theme || themeState.currentTheme.id,
                         notifications: formData.notifications,
                     },
@@ -89,7 +91,7 @@ function UserProfileComponent() {
     // Handle cancel editing
     const handleCancel = () => {
         setFormData({
-            name: state.user?.name || '',
+            name: state.user?.userName || '',
             email: state.user?.email || '',
             telephone: state.user?.telephone || '',
             firstName: state.user?.profile?.firstName || '',
@@ -145,8 +147,8 @@ function UserProfileComponent() {
     // Get role badge variant
     const getRoleBadgeVariant = (role: string) => {
         switch (role) {
-            case 'admin': return 'danger';
-            case 'moderator': return 'warning';
+            case 'ADMIN': return 'danger';
+            case 'MODERATOR': return 'warning';
             default: return 'primary';
         }
     };

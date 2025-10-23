@@ -56,7 +56,7 @@ export function withAuth<P extends object>(
                 requiredRoles.length > 0
             ) {
                 const hasRequiredRole = requiredRoles.some(role => {
-                    if (role === 'admin') return isAdmin();
+                    if (role === 'ADMIN') return isAdmin();
                     return hasRole(role);
                 });
 
@@ -106,7 +106,7 @@ export function withAuth<P extends object>(
             requiredRoles.length > 0
         ) {
             const hasRequiredRole = requiredRoles.some(role => {
-                if (role === 'admin') return isAdmin();
+                if (role === 'ADMIN') return isAdmin();
                 return hasRole(role);
             });
 
@@ -144,10 +144,10 @@ export const withRequireAuth = <P extends object>(Component: ComponentType<P>) =
     withAuth(Component, { requireAuth: true });
 
 export const withAdminOnly = <P extends object>(Component: ComponentType<P>) =>
-    withAuth(Component, { requireAuth: true, requiredRoles: ['admin'] });
+    withAuth(Component, { requireAuth: true, requiredRoles: ['ADMIN'] });
 
 export const withModeratorOrAdmin = <P extends object>(Component: ComponentType<P>) =>
-    withAuth(Component, { requireAuth: true, requiredRoles: ['admin', 'moderator'] });
+    withAuth(Component, { requireAuth: true, requiredRoles: ['ADMIN', 'MODERATOR'] });
 
 export const withOptionalAuth = <P extends object>(Component: ComponentType<P>) =>
     withAuth(Component, { requireAuth: false });
@@ -161,13 +161,13 @@ export function usePermissions() {
         if (!state.isAuthenticated) return false;
         
         if (typeof permission === 'string') {
-            if (permission === 'admin') return isAdmin();
+            if (permission === 'ADMIN') return isAdmin();
             return hasRole(permission);
         }
         
         // Array of permissions - user needs at least one
         return permission.some(perm => {
-            if (perm === 'admin') return isAdmin();
+            if (perm === 'ADMIN') return isAdmin();
             return hasRole(perm);
         });
     };
@@ -177,7 +177,7 @@ export function usePermissions() {
         if (requiredRoles.length === 0) return true;
         
         return requiredRoles.some(role => {
-            if (role === 'admin') return isAdmin();
+            if (role === 'ADMIN') return isAdmin();
             return hasRole(role);
         });
     };

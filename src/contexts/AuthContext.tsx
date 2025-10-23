@@ -1,25 +1,26 @@
 import { createContext, useContext, useReducer, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import axiosInstance from '../api/authPromise'; // Import the mocked Axios instance from the previous response
 import type { AxiosResponse } from 'axios';
+import User from '../models/user/User';
 
-// User types and interfaces
-export interface User {
-    id: string;
-    email?: string;
-    telephone?: string;
-    password?: string;
-    name: string;
-    role: 'admin' | 'user' | 'moderator';
-    profile?: {
-        firstName: string;
-        lastName: string;
-        avatar?: string;
-        preferences?: {
-            theme: string;
-            notifications: boolean;
-        };
-    };
-}
+// // User types and interfaces
+// export interface User {
+//     id: string;
+//     email?: string;
+//     telephone?: string;
+//     password?: string;
+//     name: string;
+//     role: 'ADMIN' | 'USER' | 'MODERATOR';
+//     profile?: {
+//         firstName: string;
+//         lastName: string;
+//         avatar?: string;
+//         preferences?: {
+//             theme: string;
+//             notifications: boolean;
+//         };
+//     };
+// }
 
 export interface AuthState {
     user: User | null;
@@ -182,6 +183,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             let response: AxiosResponse;
             if (method === 'custom') {
                 response = await axiosInstance.post('/api/auth/login', credentials);
+                console.log("response: ", response);
             } else {
                 // Keycloak login logic
                 response = await axiosInstance.post('/api/auth/keycloak');
@@ -260,7 +262,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
 
     const isAdmin = useCallback((): boolean => {
-        return state.user?.role === 'admin';
+        return state.user?.role === 'ADMIN';
     }, [state.user?.role]);
 
     // Complete verification function

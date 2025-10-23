@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
 import axiosInstance from '../api/authPromise';
 import { AxiosResponse } from 'axios';
-import { User } from './AuthContext';
+import User from '../models/user/User';
 
 
 // Theme types and interfaces

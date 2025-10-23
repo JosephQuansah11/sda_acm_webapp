@@ -19,7 +19,7 @@ export function QuickStartGuide({ show, onHide }: QuickStartGuideProps) {
             content: (
                 <div className="text-center">
                     <i className="bi bi-heart-fill text-danger" style={{ fontSize: '3rem' }}></i>
-                    <h4 className="mt-3">Welcome, {state.user?.name}!</h4>
+                    <h4 className="mt-3">Welcome, {state.user?.userName}!</h4>
                     <p className="text-muted">
                         You're now logged in as a <Badge bg="primary">{state.user?.role}</Badge>. 
                         Let's take a quick tour of what you can do.
@@ -61,13 +61,13 @@ export function QuickStartGuide({ show, onHide }: QuickStartGuideProps) {
                     <div className="mb-3">
                         <strong>Your Permissions:</strong>
                         <div className="mt-2">
-                            {state.user?.role === 'admin' && (
+                            {state.user?.role === 'ADMIN' && (
                                 <Badge bg="danger" className="me-2">Full Access - Can view, edit, and delete</Badge>
                             )}
-                            {state.user?.role === 'moderator' && (
+                            {state.user?.role === 'MODERATOR' && (
                                 <Badge bg="warning" className="me-2">Moderator - Can view and edit members</Badge>
                             )}
-                            {state.user?.role === 'user' && (
+                            {state.user?.role === 'USER' && (
                                 <Badge bg="secondary" className="me-2">User - Can view member information</Badge>
                             )}
                         </div>
