@@ -3,7 +3,7 @@ import { verificationService } from "./verificationService";
 import { getAllUsers } from "./UserApi";
 import { getLoginPasswordEncoded } from "./UserApi";
 import User, { UserForm } from "../models/user/User";
-import { access } from "fs";
+// import { access } from "fs";
 
 let initialApiUsers: User[] = [];
 
@@ -169,7 +169,6 @@ export const mockAuthService = {
 
     // Generate a mock JWT
     const token = `mock-jwt-token-${newUserId}-${Date.now()}`;
-    localStorage.setItem('authToken', token);
     
     const requiresVerification = isAuthenticated;
     const verificationState: VerificationState | null = isAuthenticated
@@ -177,9 +176,12 @@ export const mockAuthService = {
           isVerificationRequired: true,
           identifier: email,
           type: "email",
-          tempToken: `temp-token-${newUserId}`,
+          tempToken: `temp-token-${newUserId}-${Date.now()}`,
         }
       : null;
+        let mockUser : User = newUser as User;
+        mockUser.id = newUserId
+      mockUsers.push(mockUser);
 
     return { user: newUser, token, requiresVerification, verificationState };
   },

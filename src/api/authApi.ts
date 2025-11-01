@@ -115,7 +115,7 @@ export const authApiService = {
         }
     },
 
-    // Keycloak login initiation
+    // // Keycloak login initiation
     // async initiateKeycloakLogin(): Promise<{ redirectUrl: string }> {
     //     const response = await authApi.get<{ redirectUrl: string }>('/auth/keycloak/login');
     //     return response.data;

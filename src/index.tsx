@@ -1,5 +1,5 @@
 // src/main.tsx
-import React from "react";
+// import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext"; // Your unified context
@@ -11,14 +11,13 @@ const eventLogger = (event: unknown, error: unknown) => {
 };
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <ReactKeycloakProvider
       authClient={keycloak}
       initOptions={{
-        onLoad: "login-required", //check-sso
-        // silentCheckSsoRedirectUri:
-        //   window.location.origin + "/silent-check-sso.html",
-        // pkceMethod: "S256",
+        onLoad: "check-sso",
+        silentCheckSsoRedirectUri: window.location.origin + "/silent-check-sso.html",
+        pkceMethod: "S256",
       }}
       onEvent={eventLogger}
     >
@@ -26,5 +25,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <App />
       </AuthProvider>
     </ReactKeycloakProvider>
-  </React.StrictMode>,
+  // </React.StrictMode>,
 );

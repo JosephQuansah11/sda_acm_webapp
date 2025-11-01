@@ -20,7 +20,6 @@ mock.onPost('/api/auth/login').reply(async (config) => {
 mock.onPost('/api/auth/keycloak/login').reply(async (config) => {
   try {
     const result = await mockAuthService.keycloakLogin(config.data);
-    // alert("keyclaok result "+ result)
     return [200, result];
   } catch (error) {
     return [401, { message: (error as Error).message }];
@@ -39,7 +38,8 @@ mock.onPost('/api/auth/complete-login').reply(async (config) => {
 
 mock.onPost('/api/auth/validate').reply(async (config) => {
   try {
-    const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
+    const token = config!.headers?.Authorization?.replace('Bearer ', '') || '';
+    alert("found token "+ token)
     const user = await mockAuthService.validateToken(token);
     return [200, user];
   } catch (error) {
@@ -49,7 +49,8 @@ mock.onPost('/api/auth/validate').reply(async (config) => {
 
 mock.onGet('/api/auth/validate').reply(async (config) => {
   try {
-    const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
+    const token = config!.headers?.Authorization?.replace('Bearer ', '') || '';
+    alert("found token in get "+ token)
     const user = await mockAuthService.validateToken(token);
     return [200, user];
   } catch (error) {
