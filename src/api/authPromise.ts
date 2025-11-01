@@ -16,6 +16,17 @@ mock.onPost('/api/auth/login').reply(async (config) => {
   }
 });
 
+
+mock.onPost('/api/auth/keycloak/login').reply(async (config) => {
+  try {
+    const result = await mockAuthService.keycloakLogin(config.data);
+    // alert("keyclaok result "+ result)
+    return [200, result];
+  } catch (error) {
+    return [401, { message: (error as Error).message }];
+  }
+});
+
 mock.onPost('/api/auth/complete-login').reply(async (config) => {
   try {
     const tempToken = JSON.parse(config.data).tempToken;
@@ -70,7 +81,7 @@ mock.onPost('/api/user/profile').reply(async (config) => {
 mock.onPut('/api/user/preferences').reply(async (config) => {
   try {
     const config_data = JSON.parse(config.data);
-    const token =(config_data.headers.Authorization.replace('Bearer ', '') || '');
+    const token = (config_data.headers.Authorization.replace('Bearer ', '') || '');
     const user = await mockAuthService.validateToken(token);
     const requestedTheme = JSON.parse(config_data.data).theme;
     user.profile!.preferences!.theme = requestedTheme;

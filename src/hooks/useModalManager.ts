@@ -8,6 +8,10 @@ export function useModalManager<T>() {
     // Edit modal state
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingItem, setEditingItem] = useState<T | null>(null);
+
+    // Add modal state
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [addingItem, setAddingItem] = useState<T | null>(null);
     
     // Delete modal state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -22,6 +26,17 @@ export function useModalManager<T>() {
     const closeEditModal = () => {
         setShowEditModal(false);
         setEditingItem(null);
+    };
+    
+    // Add modal handlers
+    const openAddModal = (item: T) => {
+        setAddingItem(item);
+        setShowAddModal(true);
+    };
+    
+    const closeAddModal = () => {
+        setShowAddModal(false);
+        setAddingItem(null);
     };
     
     // Delete modal handlers
@@ -49,6 +64,12 @@ export function useModalManager<T>() {
         editingItem,
         openEditModal,
         closeEditModal,
+        
+        // Add modal
+        showAddModal,
+        addingItem,
+        openAddModal,
+        closeAddModal,
         
         // Delete modal
         showDeleteModal,

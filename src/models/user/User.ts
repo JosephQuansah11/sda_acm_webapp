@@ -22,4 +22,30 @@ export type UserForm = {
     role: string;
 };
 
+export const initialUserForm: UserForm = {
+    userName: '',
+    email: '',
+    telephone: '',
+    password: '',
+    address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+        countryCode: '',
+    },
+    profile: {
+        firstName: '',
+        lastName: '',
+        preferences: {
+            language: '',
+            theme: '',
+            notifications: false,
+        },
+        avatar: '',
+    },
+    role: '',
+};
+
 export default User;

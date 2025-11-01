@@ -14,7 +14,7 @@ interface WithAuthOptions {
 const defaultOptions: WithAuthOptions = {
     requireAuth: true,
     requiredRoles: [],
-    redirectTo: '/login',
+    redirectTo: '/login', //login
     fallbackComponent: undefined,
 };
 
@@ -39,7 +39,7 @@ export function withAuth<P extends object>(
 
         useEffect(() => {
             // If authentication is required but user is not authenticated
-            if (requireAuth && !state.isAuthenticated && !state.isLoading) {
+            if (requireAuth && !state.isAuthenticated) {
                 // Store the attempted location for redirect after login
                 navigate(redirectTo!, { 
                     state: { from: location.pathname },

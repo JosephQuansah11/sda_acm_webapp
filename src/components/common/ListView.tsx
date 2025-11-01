@@ -9,7 +9,6 @@ import { EditUserContent } from "../../hooks/users/useUserContent";
 import User from "../../models/user/User";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorAlert } from "./ErrorAlert";
-import '../../App.scss';
 import { usePermissions } from '../../security/withAuth';
 
 interface ListViewProps<T extends BaseEntity> {

@@ -33,7 +33,7 @@ authApi.interceptors.response.use(
             // Token expired or invalid
             localStorage.removeItem('authToken');
             localStorage.removeItem('loginMethod');
-            window.location.href = '/login';
+            // window.location.href = '/login';
         }
         return Promise.reject(error);
     }
@@ -116,19 +116,19 @@ export const authApiService = {
     },
 
     // Keycloak login initiation
-    async initiateKeycloakLogin(): Promise<{ redirectUrl: string }> {
-        const response = await authApi.get<{ redirectUrl: string }>('/auth/keycloak/login');
-        return response.data;
-    },
+    // async initiateKeycloakLogin(): Promise<{ redirectUrl: string }> {
+    //     const response = await authApi.get<{ redirectUrl: string }>('/auth/keycloak/login');
+    //     return response.data;
+    // },
 
-    // Keycloak callback handling
-    async handleKeycloakCallback(code: string, state: string): Promise<LoginResponse> {
-        const response = await authApi.post<LoginResponse>('/auth/keycloak/callback', {
-            code,
-            state,
-        });
-        return response.data;
-    },
+    // // Keycloak callback handling
+    // async handleKeycloakCallback(code: string, state: string): Promise<LoginResponse> {
+    //     const response = await authApi.post<LoginResponse>('/auth/keycloak/callback', {
+    //         code,
+    //         state,
+    //     });
+    //     return response.data;
+    // },
 
     // Forgot password
     async forgotPassword(identifier: string, identifierType: 'email' | 'phone'): Promise<{ message: string }> {

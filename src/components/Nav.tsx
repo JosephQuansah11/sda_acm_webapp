@@ -1,8 +1,7 @@
 import { Nav, NavLink, OverlayTrigger, Tooltip, Dropdown } from 'react-bootstrap';
 import Navbar from 'react-bootstrap/Navbar';
-import MyIcon from '../images/sda_cm_logo.png';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import '../App.scss'
+// import MyIcon from '../images/sda_cm_logo.png';
+// import '@node_modules/bootstrap-icons/font/bootstrap-icons.css';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,7 +40,7 @@ export function CustomNav() {
         >
             <Navbar.Brand href="/dashboard" className="w-100 m-0 p-0 position-relative d-flex justify-content-center align-items-center">
                 <img
-                    src={MyIcon}
+                    src={"../images/sda_cm_logo.png"}
                     alt="My Icon"
                     width="100%"
                     style={{ borderRadius: '10%' }}

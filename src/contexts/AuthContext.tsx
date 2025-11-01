@@ -1,327 +1,421 @@
-import { createContext, useContext, useReducer, useEffect, ReactNode, useCallback, useMemo } from 'react';
-import axiosInstance from '../api/authPromise'; // Import the mocked Axios instance from the previous response
-import type { AxiosResponse } from 'axios';
-import User from '../models/user/User';
-
-// // User types and interfaces
-// export interface User {
-//     id: string;
-//     email?: string;
-//     telephone?: string;
-//     password?: string;
-//     name: string;
-//     role: 'ADMIN' | 'USER' | 'MODERATOR';
-//     profile?: {
-//         firstName: string;
-//         lastName: string;
-//         avatar?: string;
-//         preferences?: {
-//             theme: string;
-//             notifications: boolean;
-//         };
-//     };
-// }
+// src/context/AuthProvider.tsx
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from "react";
+import axiosInstance from "../api/authPromise";
+import type { AxiosResponse } from "axios";
+import User from "../models/user/User";
+import { useKeycloak } from "@react-keycloak/web";
+import {
+  addAccessTokenToAuthHeader,
+  removeAccessTokenFromAuthHeader,
+} from "../services/auth";
 
 export interface AuthState {
-    user: User | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    error: string | null;
-    loginMethod: 'custom' | 'keycloak' | null;
-    verificationState: VerificationState | null;
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  loginMethod: "custom" | "keycloak" | null;
+  verificationState: VerificationState | null;
 }
 
-// Auth actions
 type AuthAction =
-    | { type: 'AUTH_START' }
-    | { type: 'AUTH_SUCCESS'; payload: { user: User; method: 'custom' | 'keycloak' } }
-    | { type: 'AUTH_FAILURE'; payload: string }
-    | { type: 'LOGOUT' }
-    | { type: 'UPDATE_USER'; payload: Partial<User> }
-    | { type: 'CLEAR_ERROR' }
-    | { type: 'REQUIRE_VERIFICATION'; payload: VerificationState }
-    | { type: 'VERIFICATION_SUCCESS' };
+  | { type: "AUTH_START" }
+  | {
+    type: "AUTH_SUCCESS";
+    payload: { user: User; method: "custom" | "keycloak" };
+  }
+  | { type: "AUTH_FAILURE"; payload: string }
+  | { type: "LOGOUT" }
+  | { type: "UPDATE_USER"; payload: Partial<User> }
+  | { type: "CLEAR_ERROR" }
+  | { type: "REQUIRE_VERIFICATION"; payload: VerificationState }
+  | { type: "VERIFICATION_SUCCESS" };
 
-// Initial state
 const initialState: AuthState = {
-    user: null,
-    isAuthenticated: false,
-    isLoading: false,
-    error: null,
-    loginMethod: null,
-    verificationState: null,
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+  error: null,
+  loginMethod: null,
+  verificationState: null,
 };
 
-// Auth reducer (unchanged)
 function authReducer(state: AuthState, action: AuthAction): AuthState {
-    switch (action.type) {
-        case 'AUTH_START':
-            return {
-                ...state,
-                isLoading: true,
-                error: null,
-            };
-        case 'AUTH_SUCCESS':
-            return {
-                ...state,
-                user: action.payload.user,
-                isAuthenticated: true,
-                isLoading: false,
-                error: null,
-                loginMethod: action.payload.method,
-            };
-        case 'AUTH_FAILURE':
-            return {
-                ...state,
-                user: null,
-                isAuthenticated: false,
-                isLoading: false,
-                error: action.payload,
-                loginMethod: null,
-            };
-        case 'LOGOUT':
-            return {
-                ...initialState,
-            };
-        case 'UPDATE_USER':
-            return {
-                ...state,
-                user: state.user ? { ...state.user, ...action.payload } : null,
-            };
-        case 'CLEAR_ERROR':
-            return {
-                ...state,
-                error: null,
-            };
-        case 'REQUIRE_VERIFICATION':
-            return {
-                ...state,
-                isLoading: false,
-                verificationState: action.payload,
-                error: null,
-            };
-        case 'VERIFICATION_SUCCESS':
-            return {
-                ...state,
-                verificationState: null,
-            };
-        default:
-            return state;
-    }
+  switch (action.type) {
+    case "AUTH_START":
+      return { ...state, isLoading: true, error: null };
+    case "AUTH_SUCCESS":
+      return {
+        ...state,
+        user: action.payload.user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+        loginMethod: action.payload.method,
+      };
+    case "AUTH_FAILURE":
+      return {
+        ...state,
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: action.payload,
+        loginMethod: null,
+      };
+    case "LOGOUT":
+      return { ...initialState, isLoading: false };
+    case "UPDATE_USER":
+      return {
+        ...state,
+        user: state.user ? { ...state.user, ...action.payload } : null,
+      };
+    case "CLEAR_ERROR":
+      return { ...state, error: null };
+    case "REQUIRE_VERIFICATION":
+      return {
+        ...state,
+        isLoading: false,
+        verificationState: action.payload,
+        error: null,
+      };
+    case "VERIFICATION_SUCCESS":
+      return { ...state, verificationState: null };
+    default:
+      return state;
+  }
 }
 
-// Context interface
 interface AuthContextType {
-    state: AuthState;
-    login: (credentials: LoginCredentials, method: 'custom' | 'keycloak') => Promise<void>;
-    logout: () => void;
-    updateUser: (updates: Partial<User>) => void;
-    hasRole: (role: string) => boolean;
-    isAdmin: () => boolean;
-    clearError: () => void;
-    completeVerification: () => void;
+  state: AuthState;
+  login: (
+    credentials?: LoginCredentials,
+    method?: "custom" | "keycloak",
+  ) => Promise<void>;
+  logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
+  hasRole: (role: string) => boolean;
+  isAdmin: () => boolean;
+  clearError: () => void;
+  completeVerification: () => Promise<void>;
 }
 
 export interface LoginCredentials {
-    identifier: string;
-    password: string;
-    identifierType: 'email' | 'phone';
+  identifier: string;
+  password: string;
+  identifierType: "email" | "phone";
 }
 
 export interface VerificationState {
-    isVerificationRequired: boolean;
-    identifier: string;
-    type: 'email' | 'sms';
-    tempToken?: string; // Temporary token for verification step
+  isVerificationRequired: boolean;
+  identifier: string;
+  type: "email" | "sms";
+  tempToken?: string;
 }
 
-// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Auth provider component
 interface AuthProviderProps {
-    children: ReactNode;
-    verificationState?: VerificationState;
+  children: ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-    const [state, dispatch] = useReducer(authReducer, initialState);
+  const [state, dispatch] = useReducer(authReducer, initialState);
+  const { keycloak, initialized } = useKeycloak();
+  let keycloakToken: string | undefined;
 
-    // Check for existing session on mount
-    useEffect(() => {
-        const checkExistingSession = async () => {
-            const token = localStorage.getItem('authToken');
-            const loginMethod = localStorage.getItem('loginMethod') as 'custom' | 'keycloak' | null;
-            
-            if (token && loginMethod) {
-                dispatch({ type: 'AUTH_START' });
-                try {
-                    const response: AxiosResponse<User> = await axiosInstance.get('/api/auth/validate', {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-                    dispatch({
-                        type: 'AUTH_SUCCESS',
-                        payload: { user: response.data, method: loginMethod },
-                    });
-                } catch (error: any) {
-                    localStorage.removeItem('authToken');
-                    localStorage.removeItem('loginMethod');
-                    const errorMessage = error.response?.data?.message || 'Session validation failed';
-                    dispatch({ type: 'AUTH_FAILURE', payload: errorMessage });
-                }
-            }
-        };
-        checkExistingSession();
-    }, []);
+  // Sync Keycloak → AuthState
+  useEffect(() => {
+    if (!initialized) return;
+    const checkExistingSession = async () => {
+      let token = localStorage.getItem("authToken");
+      const loginMethod = localStorage.getItem("loginMethod") as
+        | "custom"
+        | "keycloak"
+        | null;
 
-    // Login function
-    const login = useCallback(async (credentials: LoginCredentials, method: 'custom' | 'keycloak') => {
-        dispatch({ type: 'AUTH_START' });
+      if (token && loginMethod == "custom") {
+        dispatch({ type: "AUTH_START" });
         try {
-            let response: AxiosResponse;
-            if (method === 'custom') {
-                response = await axiosInstance.post('/api/auth/login', credentials);
-                console.log("response: ", response);
-            } else {
-                // Keycloak login logic
-                response = await axiosInstance.post('/api/auth/keycloak');
-            }
+          const response: AxiosResponse<User> = await axiosInstance.get(
+            "/api/auth/validate",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+          dispatch({
+            type: "AUTH_SUCCESS",
+            payload: { user: response.data, method: loginMethod },
+          });
+        } catch (error: any) {
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("loginMethod");
+          const errorMessage =
+            error.response?.data?.message || "Session validation failed";
+          dispatch({ type: "AUTH_FAILURE", payload: errorMessage });
+        }
+      }
+    }
 
-            // Check if verification is required (only for custom login)
-            if (method === 'custom' && response.data.requiresVerification && response.data.verificationState) {
+    const syncKeycloak = async () => {
+      const loginMethod = localStorage.getItem("loginMethod") as
+        | "custom"
+        | "keycloak"
+        | null;
+      if (loginMethod == null || loginMethod == 'keycloak') {
+        keycloakToken = keycloak.token!;
+      }
+      if (keycloak.authenticated) {
+        try {
+          addAccessTokenToAuthHeader(keycloakToken);
+
+          // Call your backend to get full User object
+          const response = await axiosInstance.post("/api/auth/keycloak/login", {
+            accessToken: keycloakToken,
+            email: keycloak.idTokenParsed?.email,
+            isAuthenticated: keycloak.authenticated,
+            keycloakObject: keycloak
+          });
+          alert(response.data.token + " : " + loginMethod == "keycloak")
+
+          if (response.data.token && loginMethod == "keycloak") {
+            dispatch({ type: "AUTH_START" });
+            try {
+              const validationResponse: AxiosResponse<User> = await axiosInstance.get(
+                "/api/auth/validate",
+                {
+                  headers: {
+                    Authorization: `Bearer ${response.data.token}`,
+                  },
+                },
+              );
+              dispatch({
+                type: "AUTH_SUCCESS",
+                payload: { user: validationResponse.data, method: loginMethod },
+              });
+
+              if (
+                response.data.requiresVerification &&
+                response.data.verificationState
+              ) {
                 dispatch({
-                    type: 'REQUIRE_VERIFICATION',
-                    payload: response.data.verificationState,
+                  type: "REQUIRE_VERIFICATION",
+                  payload: response.data.verificationState,
                 });
                 return;
-            }
+              }
 
-            // For Keycloak or successful verification, proceed with normal login
-            if (response.data.user && response.data.token) {
-                console.log("saving token and method")
-                // Store token and method
-                localStorage.setItem('authToken', response.data.token);
-                localStorage.setItem('loginMethod', method);
+              localStorage.setItem("authToken", response.data.token);
+              localStorage.setItem("loginMethod", "keycloak");
+              alert("Reached here");
 
-                dispatch({
-                    type: 'AUTH_SUCCESS',
-                    payload: { user: response.data.user, method },
-                });
-            } else {
-                throw new Error('Invalid response format');
+              dispatch({
+                type: "AUTH_SUCCESS",
+                payload: { user: response.data.user, method: "custom" },
+              });
+
+
+            } catch (error: any) {
+              localStorage.removeItem("authToken");
+              localStorage.removeItem("loginMethod");
+              const errorMessage =
+                error.validationResponse?.data?.message || "Session validation failed";
+              dispatch({ type: "AUTH_FAILURE", payload: errorMessage });
             }
+          }
+
+
         } catch (error: any) {
-            const errorMessage = error.response?.data?.message || 'Login failed';
-            dispatch({ type: 'AUTH_FAILURE', payload: errorMessage });
+          console.error("Keycloak sync failed:", error);
+          keycloak.logout();
         }
-    }, []);
-
-    // Logout function
-    const logout = useCallback(() => {
-        // Clear all authentication-related localStorage items
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('loginMethod');
-
-        // Clear any verification state
-        dispatch({ type: 'LOGOUT' });
-
-        // Optional: Call logout API endpoint to invalidate server-side session
-        const token = localStorage.getItem('authToken');
-        if (token) {
-            axiosInstance
-                .post('/api/auth/logout', undefined, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-                .catch((error: any) => {
-                    // Silently handle logout API errors since local logout is more important
-                    console.warn('Logout API call failed:', error);
-                });
+      } else {
+        const method = localStorage.getItem("loginMethod");
+        if (method === "keycloak") {
+          localStorage.removeItem("loginMethod");
+          dispatch({ type: "LOGOUT" });
         }
-    }, []);
+      }
+    };
+    checkExistingSession();
+    syncKeycloak();
+  }, [keycloak]);
 
-    // Update user function
-    const updateUser = useCallback((updates: Partial<User>) => {
-        dispatch({ type: 'UPDATE_USER', payload: updates });
-    }, []);
+  // Token refresh
+  // useEffect(() => {
+  //   if (!initialized || !keycloak.authenticated) return;
 
-    // Clear error function
-    const clearError = useCallback(() => {
-        dispatch({ type: 'CLEAR_ERROR' });
-    }, []);
+  //   const interval = setInterval(() => {
+  //     keycloak
+  //       .updateToken(30)
+  //       .then((refreshed) => {
+  //         if (refreshed) {
+  //           addAccessTokenToAuthHeader(keycloak.token);
+  //         }
+  //       })
+  //       .catch(() => {
+  //         console.error("Failed to refresh token");
+  //         keycloak.logout();
+  //       });
+  //   }, 60000); // Every minute
 
-    // Role checking functions
-    const hasRole = useCallback(
-        (role: string): boolean => {
-            return state.user?.role === role;
-        },
-        [state.user?.role]
-    );
+  //   return () => clearInterval(interval);
+  // }, [keycloak, initialized]);
 
-    const isAdmin = useCallback((): boolean => {
-        return state.user?.role === 'ADMIN';
-    }, [state.user?.role]);
+  // Custom login
+  const login = useCallback(
+    async (
+      credentials?: LoginCredentials,
+      method: "custom" | "keycloak" = "custom",
+    ) => {
+      dispatch({ type: "AUTH_START" });
 
-    // Complete verification function
-    const completeVerification = useCallback(async () => {
-        if (!state.verificationState?.tempToken) {
-            dispatch({ type: 'AUTH_FAILURE', payload: 'No verification session found' });
-            return;
+      try {
+        if (method === "keycloak") {
+          try {
+            await keycloak.login();//{ redirectUri: window.location.origin + "/dashboard" }
+
+          } catch (error: any) {
+            const msg = error.message || "Keycloak login failed";
+            dispatch({ type: "AUTH_FAILURE", payload: msg });
+          }
+          return;
         }
-        
-        try {
-            const response: AxiosResponse = await axiosInstance.post('/api/auth/complete-login', {
-                tempToken: state.verificationState.tempToken,
-            });
 
-             console.log('completeVerification response ', response);
-            if (response.data.user && response.data.token) {
-                // Store token and method
-                localStorage.setItem('authToken', response.data.token);
-                localStorage.setItem('loginMethod', 'custom');
+        // Custom login
+        const response = await axiosInstance.post(
+          "/api/auth/login",
+          credentials,
+        );
 
-                dispatch({
-                    type: 'AUTH_SUCCESS',
-                    payload: { user: response.data.user, method: 'custom' },
-                });
-
-                // Clear verification state
-                dispatch({ type: 'VERIFICATION_SUCCESS' });
-            } else {
-                dispatch({ type: 'AUTH_FAILURE', payload: 'Failed to complete login' });
-            }
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.message || 'Verification failed';
-            dispatch({ type: 'AUTH_FAILURE', payload: errorMessage });
+        if (
+          response.data.requiresVerification &&
+          response.data.verificationState
+        ) {
+          dispatch({
+            type: "REQUIRE_VERIFICATION",
+            payload: response.data.verificationState,
+          });
+          return;
         }
-    }, [state.verificationState?.tempToken]);
 
-    const contextValue: AuthContextType = useMemo(
-        () => ({
-            state,
-            login,
-            logout,
-            updateUser,
-            clearError,
-            hasRole,
-            isAdmin,
-            completeVerification,
-        }),
-        [state, login, logout, updateUser, clearError, hasRole, isAdmin, completeVerification]
-    );
+        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("loginMethod", "custom");
 
-    //  // console.log("contextValue ", contextValue);
-    return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
-}
+        dispatch({
+          type: "AUTH_SUCCESS",
+          payload: { user: response.data.user, method: "custom" },
+        });
+      } catch (error: any) {
+        const msg = error.response?.data?.message || "Login failed";
+        dispatch({ type: "AUTH_FAILURE", payload: msg });
+        alert(msg);
+      }
+    },
+    [keycloak],
+  );
 
-// Custom hook to use auth context
-export function useAuth(): AuthContextType {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
+  const logout = useCallback(() => {
+    const method = localStorage.getItem("loginMethod");
+
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("loginMethod");
+    removeAccessTokenFromAuthHeader();
+
+    dispatch({ type: "LOGOUT" });
+
+    if (method === "keycloak") {
+      keycloak.logout();
     }
-    return context;
+  }, [keycloak]);
+
+  const updateUser = useCallback((updates: Partial<User>) => {
+    dispatch({ type: "UPDATE_USER", payload: updates });
+  }, []);
+
+  const clearError = useCallback(() => {
+    dispatch({ type: "CLEAR_ERROR" });
+  }, []);
+
+  const hasRole = useCallback(
+    (role: string): boolean => {
+      return keycloak.hasRealmRole?.(role) || state.user?.role === role;
+    },
+    [keycloak, state.user?.role],
+  );
+
+  const isAdmin = useCallback((): boolean => {
+    return hasRole("ADMIN");
+  }, [hasRole]);
+
+  const completeVerification = useCallback(async () => {
+    if (!state.verificationState?.tempToken) {
+      dispatch({ type: "AUTH_FAILURE", payload: "No verification session" });
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post("/api/auth/complete-login", {
+        tempToken: state.verificationState.tempToken,
+      });
+
+      if (response.data.user && response.data.token) {
+        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("loginMethod", "custom");
+
+        dispatch({
+          type: "AUTH_SUCCESS",
+          payload: { user: response.data.user, method: "custom" },
+        });
+        dispatch({ type: "VERIFICATION_SUCCESS" });
+      }
+    } catch (error: any) {
+      const msg = error.response?.data?.message || "Verification failed";
+      dispatch({ type: "AUTH_FAILURE", payload: msg });
+    }
+  }, [state.verificationState?.tempToken]);
+
+  const contextValue = useMemo(
+    () => ({
+      state: { ...state, isLoading: state.isLoading || !initialized },
+      login,
+      logout,
+      updateUser,
+      hasRole,
+      isAdmin,
+      clearError,
+      completeVerification,
+    }),
+    [
+      state,
+      initialized,
+      login,
+      logout,
+      updateUser,
+      hasRole,
+      isAdmin,
+      clearError,
+      completeVerification,
+    ],
+  );
+
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 }
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;
+};
+

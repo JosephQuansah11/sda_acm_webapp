@@ -1,11 +1,10 @@
-// @import "~bootstrap/dist/css/bootstrap.min.css"; 
 
 // Default theme variables (can be overridden by theme context)
 $primary: #411b6b;
 $secondary: #6b581b;
 $success:  #680909b2;
 $navbar-width: 4rem;
-@import "node_modules/bootstrap/scss/bootstrap";
+@import "/node_modules/bootstrap/scss/bootstrap";
 
 // Theme system CSS custom properties
 :root {

@@ -4,9 +4,11 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StatCard } from '../../components/common/StatCard';
 import { QuickStartGuide } from '../../components/QuickStartGuide';
-import '../../App.scss';
 import { useUserContent } from '../../hooks/users/useUserContent';
 import { useChurchContext } from '../../hooks/church/useChurchContext';
+import { AddMemberModal } from '../../components/common/AddMemberModal';
+import { initialUserForm, UserForm } from '../../models/user/User';
+import { useModalManager } from "../../hooks/useModalManager";
 
 export function Home() {
     const { state } = useAuth();
@@ -14,6 +16,8 @@ export function Home() {
     const [showQuickStart, setShowQuickStart] = useState(false);
     const { totalMembers } = useUserContent();
     const { totalChurches } = useChurchContext();
+    const modalManager = useModalManager<UserForm>();
+
     // Show quick start guide for new users
     useEffect(() => {
         const hasSeenGuide = localStorage.getItem('hasSeenQuickStartGuide');
@@ -54,6 +58,10 @@ export function Home() {
         }
     };
 
+    const handleAddMemberModal = (item: UserForm) => {
+        modalManager.openAddModal(item);
+    }
+
     return (
         <Container fluid className="py-4">
             {/* Welcome Section */}
@@ -88,7 +96,7 @@ export function Home() {
             {/* Quick Stats */}
             <Container fluid className="m-0 p-0">
                 <Row className="d-flex flex-start justify-content-center bg-primary m-3 p-2 pt-4 pb-4">
-                    <StatCard 
+                    <StatCard
                         icon="bi-people-fill"
                         iconColor="primary"
                         value={totalMembers}
@@ -165,7 +173,7 @@ export function Home() {
                                     <div>
                                         <small className="fw-bold">New Member Registered</small>
                                         <br />
-                                        <small className="text-muted">John Doe joined today</small>
+                                        <small className="text-muted">John Doe {Date.now()} joined today</small>
                                     </div>
                                 </div>
                                 <div className="d-flex align-items-center mb-3">
@@ -198,7 +206,10 @@ export function Home() {
                                 </Card.Header>
                                 <Card.Body>
                                     <div className="d-grid gap-2">
-                                        <button className="btn btn-outline-primary btn-sm">
+                                        <button className="btn btn-outline-primary btn-sm" onClick={() => {
+                                            console.log("Add New Member");
+                                            handleAddMemberModal(initialUserForm);
+                                        }}>
                                             <i className="bi bi-person-plus me-2"></i>
                                             Add New Member
                                         </button>
@@ -227,6 +238,14 @@ export function Home() {
                 show={showQuickStart}
                 onHide={handleQuickStartClose}
             />
+        
+            {/* Add Member Modal */}
+            <AddMemberModal<UserForm> showEditModal={modalManager.showAddModal} 
+            addMember={modalManager.addingItem} 
+            onCloseEditModal={modalManager.closeAddModal} 
+            onEditSubmit={(updatedItem: UserForm) => {
+                console.log(updatedItem);
+            }} />
         </Container>
     );
 }

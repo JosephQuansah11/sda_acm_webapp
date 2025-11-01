@@ -4,7 +4,7 @@ import {AddForm} from "../../components/common/AddForm";
 import { UserForm } from "../../models/user/User";
 import { useMemo } from "react";
 import { AddUserContent } from "../../hooks/users/useUserContent";
-
+import { useNavigate } from "react-router-dom";
 export default function SignUpPage() {
     
     const { state, clearError } = useAuth();
@@ -32,6 +32,7 @@ export default function SignUpPage() {
     // }
     const adminAvatar = 'https://media.tenor.com/xqStQSFQotIAAAAm/cute-eyes-aang.webp';
     const moderatorAvatar = 'https://media.tenor.com/hD5dujWbbq0AAAAm/really-zhao.webp';
+    const navigate = useNavigate();
 
     const userForm = useMemo(() => {
         return {
@@ -76,7 +77,7 @@ export default function SignUpPage() {
                                 {state.error}
                             </Alert>
                         )}
-                        <AddForm <UserForm> items={userForm} onSubmit={AddUserContent} buttonName="Sign Up" />
+                        <AddForm <UserForm> items={userForm} onSubmit={(userForm) => {AddUserContent(userForm); navigate("/login");  }} buttonName="Sign Up" />
                     </Card.Body>
                 </Card>
             </Col>

@@ -41,7 +41,7 @@ function generateVerificationCode(): string {
 
 // Mock email sending service
 async function sendEmailCode(email: string, code: string): Promise<boolean> {
-     // console.log(`📧 Sending verification code to ${email}: ${code}`);
+     console.log(`📧 Sending verification code to ${email}: ${code}`);
     
     // // Simulate email sending delay
     // await new Promise(resolve => setTimeout(resolve, 1000));
@@ -63,7 +63,7 @@ async function sendEmailCode(email: string, code: string): Promise<boolean> {
 
 // Mock SMS sending service
 async function sendSMSCode(phone: string, code: string): Promise<boolean> {
-     // console.log(`📱 Sending SMS verification code to ${phone}: ${code}`);
+     console.log(`📱 Sending SMS verification code to ${phone}: ${code}`);
     
     // Simulate SMS sending delay
     await new Promise(resolve => setTimeout(resolve, 1200));
