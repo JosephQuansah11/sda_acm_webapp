@@ -1,18 +1,25 @@
 // src/main.tsx
-// import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext"; // Your unified context
-import { ReactKeycloakProvider } from "@react-keycloak/web";
-import keycloak from "./models/auth/keycloak";
+// import { ReactKeycloakProvider } from "@react-keycloak/web";
+import Keycloak from "keycloak-js";
+// import React from "react";
+import { KeycloakSecurityProvider } from "./models/auth/KeycloakSecurityProvider";
 
-const eventLogger = (event: unknown, error: unknown) => {
-  console.log("Keycloak event:", event, error);
-};
+// const eventLogger = (event: unknown, error: unknown) => {
+//   console.log("Keycloak event:", event, error);
+// };
+const keycloak = new Keycloak({
+  url: "http://localhost:8081",
+  realm: "sda_acm",
+  clientId: "sda_acm_client",
+});
+
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   // <React.StrictMode>
-    <ReactKeycloakProvider
+  /* <ReactKeycloakProvider
       authClient={keycloak}
       initOptions={{
         onLoad: "check-sso",
@@ -20,10 +27,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         pkceMethod: "S256",
       }}
       onEvent={eventLogger}
-    >
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </ReactKeycloakProvider>
-  // </React.StrictMode>,
+    >*/
+
+  // {/* </ReactKeycloakProvider> */ }
+  //  {/* </React.StrictMode>,  */ }
+
+  <KeycloakSecurityProvider keycloak={keycloak} >
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </KeycloakSecurityProvider >
 );

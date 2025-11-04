@@ -30,6 +30,7 @@ mock.onPost('/api/auth/complete-login').reply(async (config) => {
   try {
     const tempToken = JSON.parse(config.data).tempToken;
     const result = await mockAuthService.completeLogin(tempToken);
+    console.log(result)
     return [200, result];
   } catch (error) {
     return [401, { message: (error as Error).message }];
@@ -38,8 +39,7 @@ mock.onPost('/api/auth/complete-login').reply(async (config) => {
 
 mock.onPost('/api/auth/validate').reply(async (config) => {
   try {
-    const token = config!.headers?.Authorization?.replace('Bearer ', '') || '';
-    alert("found token "+ token)
+    const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
     const user = await mockAuthService.validateToken(token);
     return [200, user];
   } catch (error) {
@@ -49,8 +49,7 @@ mock.onPost('/api/auth/validate').reply(async (config) => {
 
 mock.onGet('/api/auth/validate').reply(async (config) => {
   try {
-    const token = config!.headers?.Authorization?.replace('Bearer ', '') || '';
-    alert("found token in get "+ token)
+    const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
     const user = await mockAuthService.validateToken(token);
     return [200, user];
   } catch (error) {

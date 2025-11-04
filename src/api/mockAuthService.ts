@@ -1,9 +1,8 @@
 import { LoginCredentials, VerificationState } from "../contexts/AuthContext";
 import { verificationService } from "./verificationService";
-import { getAllUsers } from "./UserApi";
+import { addUser, getAllUsers } from "./UserApi";
 import { getLoginPasswordEncoded } from "./UserApi";
 import User, { UserForm } from "../models/user/User";
-// import { access } from "fs";
 
 let initialApiUsers: User[] = [];
 
@@ -58,6 +57,7 @@ export const mockAuthService = {
           type: verificationType,
         });
 
+        console.log("is this triggered?")
       if (verificationResponse.success) {
         // Return verification required response
         const verificationState: VerificationState = {
@@ -66,6 +66,8 @@ export const mockAuthService = {
           type: verificationType,
           tempToken: `temp-token-${user.id}-${Date.now()}`,
         };
+
+        console.log("temp token for custom user: ",verificationState.tempToken)
 
         return {
           requiresVerification: true,
@@ -88,7 +90,6 @@ export const mockAuthService = {
 
     // Extract user ID from temp token
     const tokenParts = tempToken.split("-");
-    console.log(tokenParts);
     if (
       tokenParts.length >= 4 &&
       tokenParts[0] === "temp" &&
@@ -106,10 +107,22 @@ export const mockAuthService = {
       }, "");
 
       const userId = deducedUserId;
-      const user = mockUsers.find((u: User) => String(u.id) == userId);
+      const user = mockUsers.find((u: User) => String(u.id) == userId || u.keycloakId == userId);
 
       if (user) {
-        const token = `mock-jwt-token-${user.id}-${Date.now()}`;
+        let token = "";
+        const loginMethod = localStorage.getItem("loginMethod") as
+        | "custom"
+        | "keycloak"
+        | null;
+
+        if(loginMethod === "custom"){
+          console.log("We should be here!!!!")
+         token = `mock-jwt-token-${user.id}-${Date.now()}`;
+        }else if(loginMethod === "keycloak"){
+          console.log("Why are we here?")
+          token = `mock-jwt-token-${user.keycloakId}-${Date.now()}`
+        }
         return { user, token };
       }
     }
@@ -129,7 +142,7 @@ export const mockAuthService = {
     const resultParsedData = JSON.parse(parsedData)
     const accessToken = resultParsedData.accessToken;
     const isAuthenticated = resultParsedData.isAuthenticated;
-    const email = resultParsedData.email;
+    const email = resultParsedData.email == undefined ? resultParsedData.keycloakObject.tokenParsed?.email : "josepheducationplatform@gmail.com";
     const keycloakParsed = resultParsedData.keycloakObject //Getting keycloak instance
 
     if (!isAuthenticated || !accessToken || !email) {
@@ -137,14 +150,15 @@ export const mockAuthService = {
     }
 
     // Get user info from Keycloak
-    const userInfo = await keycloakParsed.idTokenParsed;
+    const userInfo = await keycloakParsed.tokenParsed;
 
     // Create a new mock user
-    const newUserId = Date.now();
-    const newUser: UserForm = {
-      userName:  userInfo.preferred_username || `user-${newUserId}`,
+    const newUserId = userInfo.sub;
+    let newUser: UserForm = {
+      keycloakId: userInfo.sub,
+      userName: userInfo.preferred_username || `user-${newUserId}`,
       email: userInfo.email || email,
-      password: userInfo.password, // Set a default password
+      password: "don't temp password", // Set a default password
       telephone: userInfo.telephone,
       address: {
         street: "",
@@ -162,28 +176,27 @@ export const mockAuthService = {
           language: "en",
           notifications: true,
         },
-        avatar: "",
+        avatar: "https://api.dicebear.com/9.x/identicon/svg?seed=Avery",
       },
-      role: "member",
+      role: "USER",
     };
 
-    // Generate a mock JWT
+    // // Generate a mock JWT
     const token = `mock-jwt-token-${newUserId}-${Date.now()}`;
-    
     const requiresVerification = isAuthenticated;
-    const verificationState: VerificationState | null = isAuthenticated
-      ? {
-          isVerificationRequired: true,
-          identifier: email,
-          type: "email",
-          tempToken: `temp-token-${newUserId}-${Date.now()}`,
-        }
-      : null;
-        let mockUser : User = newUser as User;
-        mockUser.id = newUserId
-      mockUsers.push(mockUser);
-
-    return { user: newUser, token, requiresVerification, verificationState };
+    const verificationState: VerificationState = {
+      isVerificationRequired: true,
+      identifier: email,
+      type: "email",
+      tempToken: `temp-token-${newUserId}-${Date.now()}`,
+    };
+    // mockUsers.push(mockUser);
+    const userId = newUserId;
+    const user = mockUsers.find((u: User) => String(u.id) == userId || u.keycloakId == userId);
+    if (!user) {
+      addUser(newUser)
+    }
+    return { user: user, token, requiresVerification, verificationState };
   },
 
   // Simulate token validation
@@ -210,8 +223,8 @@ export const mockAuthService = {
         return acc;
       }, "");
       const userId = deducedUserId;
-      const user = mockUsers.find((u: User) => String(u.id) == userId);
-
+      const user = mockUsers.find((u: User) => String(u.id) == userId || u.keycloakId == userId);
+   
       if (user) {
         return user;
       }
@@ -225,7 +238,7 @@ export const mockAuthService = {
     // // Simulate network delay
     // await new Promise(resolve => setTimeout(resolve, 800));
 
-    const userIndex = mockUsers.findIndex((u: User) => String(u.id) === userId);
+    const userIndex = mockUsers.findIndex((u: User) => String(u.id) == userId || u.keycloakId == userId);
     if (userIndex === -1) {
       throw new Error("User not found");
     }
@@ -243,7 +256,7 @@ export const mockAuthService = {
     // // Simulate network delay
     // await new Promise(resolve => setTimeout(resolve, 500));
 
-    const userIndex = mockUsers.findIndex((u) => String(u.id) === userId);
+    const userIndex = mockUsers.findIndex((u: User) => String(u.id) == userId || u.keycloakId == userId);
     if (userIndex === -1) {
       throw new Error("User not found");
     }

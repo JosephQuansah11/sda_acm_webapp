@@ -16,6 +16,9 @@ import { withRequireAuth } from "./security/withAuth";
 
 // Import mock service for demo purposes
 import "./api/authPromise";
+import keycloak from "keycloak-js";
+import { AuthProvider } from "./contexts/AuthContext";
+import { useSecurityContext } from "./models/auth/KeycloakSecurityProvider";
 
 // Protected layout component
 function ProtectedLayout() {
@@ -48,6 +51,7 @@ function AppContent() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<SignUpPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
+      {/* <Route path="/home" element={<Home />} /> */}
 
       {/* Protected Routes */}
       <Route path="/*" element={<AuthenticatedLayout />} />
@@ -59,10 +63,10 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider>
-        <AppContent />
-      </ThemeProvider>
-    </BrowserRouter>
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
+      </BrowserRouter>
   );
 }
 

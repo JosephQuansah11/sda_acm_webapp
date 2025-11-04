@@ -3,6 +3,7 @@ import { UserProfile } from "./UserProfile";
 
 type User = {
     id: number;
+    keycloakId: string;
     userName: string;
     email: string;
     telephone: string;
@@ -13,6 +14,7 @@ type User = {
 };
 
 export type UserForm = {
+    keycloakId: string;
     userName: string;
     email: string;
     telephone: string;
@@ -23,6 +25,7 @@ export type UserForm = {
 };
 
 export const initialUserForm: UserForm = {
+    keycloakId: '',
     userName: '',
     email: '',
     telephone: '',

@@ -41,10 +41,11 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (state.isAuthenticated) {
+    console.log(state.user)
+    if (state.user) {
       navigate(from, { replace: true });
     }
-  }, [state.isAuthenticated, navigate, from]);
+  }, [state]);
 
   // Clear errors when component mounts or tab changes
   useEffect(() => {
@@ -106,11 +107,13 @@ export default function LoginPage() {
       password: "password",
       identifierType: "email",
     };
-
-    // setIsSubmitting(true);
-    // Redirect to Keycloak login URL
-    console.log("login state result before keycloak ", state);
-    await login(credentials, "keycloak");
+    try {
+      setIsSubmitting(true);
+      await login(credentials, activeTab);
+    } catch (error) {
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Validate identifier based on type
@@ -265,9 +268,9 @@ export default function LoginPage() {
                       variant="primary"
                       type="submit"
                       className="w-100 py-2"
-                      disabled={!isFormValid || isSubmitting } //|| state.isLoading
+                      disabled={!isFormValid || isSubmitting} //|| state.isLoading
                     >
-                      {isSubmitting  ? (
+                      {isSubmitting ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" />
                           Signing in...
@@ -279,7 +282,7 @@ export default function LoginPage() {
                   </Form>
                 </Tab>
 
-                <Tab eventKey="keycloak" title="SSO Login" style={{height: '100%', width: '100%'}}>
+                <Tab eventKey="keycloak" title="SSO Login" style={{ height: '100%', width: '100%' }}>
                   <div className="text-center">
                     <p className="text-muted mb-4">
                       Sign in with your organization's Single Sign-On
@@ -289,7 +292,7 @@ export default function LoginPage() {
                       size="lg"
                       className="w-100 py-3"
                       onClick={handleKeycloakLogin}
-                      // disabled={state.isLoading}
+                    // disabled={state.isLoading}
                     >
                       <i className="bi bi-shield-lock me-2"></i>
                       Continue with SSO
