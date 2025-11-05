@@ -1,19 +1,19 @@
 import { Nav, NavLink, OverlayTrigger, Tooltip, Dropdown } from 'react-bootstrap';
 import Navbar from 'react-bootstrap/Navbar';
-// import MyIcon from '../images/sda_cm_logo.png';
-// import '@node_modules/bootstrap-icons/font/bootstrap-icons.css';
+
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import MyIcon from '../images/sda_cm_logo.png';
 
 export function CustomNav() {
     const { state, logout } = useAuth();
     const navigate = useNavigate();
 
     const navLinkList = [
-        { href: '/dashboard', icon: 'bi-house', title: 'Home' },
-        { href: '/members', icon: 'bi-people', title: 'Members' },
-        { href: '/events', icon: 'bi-calendar', title: 'Events' },
-        { href: '/settings', icon: 'bi-gear', title: 'Settings' },
+        { href: '/dashboard', icon: 'bi bi-house', title: 'Home' },
+        { href: '/members', icon: 'bi bi-people', title: 'Members' },
+        { href: '/events', icon: 'bi bi-calendar', title: 'Events' },
+        { href: '/settings', icon: 'bi bi-gear', title: 'Settings' },
     ];
 
     const handleShowHelp = () => {
@@ -24,7 +24,6 @@ export function CustomNav() {
 
     const handleLogout = () => {
         logout();
-        navigate('/login');
     };
     console.log(state.user?.profile.avatar);
 
@@ -35,22 +34,21 @@ export function CustomNav() {
     return (
         <Navbar
             id="Navbar"
-            expand="lg"
-            className="bg-dark d-flex flex-column align-items-center h-100"
+            className="d-flex flex-column justify-items-center align-items-center h-100"
         >
             <Navbar.Brand href="/dashboard" className="w-100 m-0 p-0 position-relative d-flex justify-content-center align-items-center">
                 <img
-                    src={"../images/sda_cm_logo.png"}
+                    src={MyIcon}
                     alt="My Icon"
-                    width="100%"
-                    style={{ borderRadius: '10%' }}
+                    width="80%"
+                    style={{ borderRadius: '20%' }}
                 />
             </Navbar.Brand>
             <Nav className="d-flex flex-column justify-content-between h-100">
-                <div className=" d-flex flex-column justify-content-around w-100 mt-3">
+                <div className="icons-list d-flex flex-column justify-content-around mt-2">
                     {navLinkList.map((link) => (
                         <OverlayTrigger key={'link'+link.title} placement="right" overlay={<Tooltip>{link.title}</Tooltip>}>
-                            <NavLink href={link.href} className="icons-list">
+                            <NavLink onClick={()=>navigate(link.href)}>
                                 <i className={link.icon + " hover-effect "}></i>
                             </NavLink>
                         </OverlayTrigger>

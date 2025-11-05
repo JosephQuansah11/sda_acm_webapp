@@ -12,7 +12,8 @@ import {
 } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
 import { LocationState } from "../../models/auth/keycloak";
-import { useAuth, LoginCredentials } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { LoginCredentials } from "../../contexts/AuthLoginContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import { VerificationCodeInput } from "../../components/VerificationCodeInput";
 
@@ -41,7 +42,7 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    console.log(state.user)
+    console.log(state.user) //login is possible but it takes a while in order to have the webpage opened
     if (state.user) {
       navigate(from, { replace: true });
     }

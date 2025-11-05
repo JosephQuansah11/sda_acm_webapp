@@ -1,4 +1,4 @@
-import Address from "../user/User";
+import { Address, AddressForm } from "../user/Address";
 
 export type Church = {
     id: string;
@@ -8,5 +8,5 @@ export type Church = {
 
 export type ChurchForm = {
     name: string;
-    address: Address;
+    address: AddressForm;
 }

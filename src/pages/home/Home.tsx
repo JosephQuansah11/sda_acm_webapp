@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge, Button } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StatCard } from '../../components/common/StatCard';
@@ -7,16 +7,20 @@ import { QuickStartGuide } from '../../components/QuickStartGuide';
 import { useUserContent } from '../../hooks/users/useUserContent';
 import { useChurchContext } from '../../hooks/church/useChurchContext';
 import { AddMemberModal } from '../../components/common/AddMemberModal';
+import { ScheduleEventModal } from '../../components/common/ScheduleEventModal';
 import { initialUserForm, UserForm } from '../../models/user/User';
 import { useModalManager } from "../../hooks/useModalManager";
+import { useNavigate } from 'react-router-dom';
 
 export function Home() {
     const { state } = useAuth();
     const { state: themeState } = useTheme();
     const [showQuickStart, setShowQuickStart] = useState(false);
+    const [showScheduleEvent, setShowScheduleEvent] = useState(false);
     const { totalMembers } = useUserContent();
     const { totalChurches } = useChurchContext();
     const modalManager = useModalManager<UserForm>();
+    const navigate = useNavigate();
 
     // Show quick start guide for new users
     useEffect(() => {
@@ -38,9 +42,65 @@ export function Home() {
         };
     }, []);
 
+    // Track user activity
+    useEffect(() => {
+        if (state.isAuthenticated && state.user) {
+            // Update user status to active when they're on the page
+            updateUserStatus('active');
+            
+            // Set up activity tracking
+            const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+            let activityTimer: NodeJS.Timeout;
+            
+            const resetActivityTimer = () => {
+                // Reset idle timer
+                clearTimeout(activityTimer);
+                
+                // Set user as active
+                updateUserStatus('active');
+                
+                // Set idle timeout (5 minutes)
+                activityTimer = setTimeout(() => {
+                    updateUserStatus('idle');
+                }, 5 * 60 * 1000);
+            };
+            
+            // Add activity listeners
+            activityEvents.forEach(event => {
+                window.addEventListener(event, resetActivityTimer, true);
+            });
+            
+            // Initialize activity timer
+            resetActivityTimer();
+            
+            // Clean up
+            return () => {
+                clearTimeout(activityTimer);
+                activityEvents.forEach(event => {
+                    window.removeEventListener(event, resetActivityTimer, true);
+                });
+            };
+        }
+    }, [state.isAuthenticated, state.user]);
+
+    const updateUserStatus = (status: 'active' | 'idle' | 'inactive') => {
+        // This would typically make an API call to update the user's status
+        console.log(`User ${state.user?.userName} is now ${status}`);
+        // In a real implementation, you would update the backend:
+        // updateUserStatusAPI(state.user.id, status);
+    };
+
     const handleQuickStartClose = () => {
         setShowQuickStart(false);
         localStorage.setItem('hasSeenQuickStartGuide', 'true');
+    };
+
+    const handleScheduleEvent = (eventData: any) => {
+        // This would typically make an API call to create the event
+        console.log('Scheduling event:', eventData);
+        // In a real implementation:
+        // createEventAPI(eventData);
+        alert('Event scheduled successfully!');
     };
 
     const getGreeting = () => {
@@ -61,6 +121,20 @@ export function Home() {
     const handleAddMemberModal = (item: UserForm) => {
         modalManager.openAddModal(item);
     }
+
+    // Calculate growth rate (mock implementation)
+    const calculateGrowthRate = () => {
+        // In a real implementation, this would fetch data from the backend
+        // For now, we'll return a mock value
+        return "+12%";
+    };
+
+    // Calculate active members (mock implementation)
+    const calculateActiveMembers = () => {
+        // In a real implementation, this would fetch data from the backend
+        // For now, we'll return a mock value
+        return "42%";
+    };
 
     return (
         <Container fluid className="py-4">
@@ -120,14 +194,14 @@ export function Home() {
                     <StatCard
                         icon="bi-graph-up"
                         iconColor="warning"
-                        value="+12%"
+                        value={calculateGrowthRate()}
                         label="Growth Rate"
                         colSize={2}
                     />
                     <StatCard
                         icon="bi-pie-chart"
                         iconColor="success"
-                        value="+12%"
+                        value={calculateActiveMembers()}
                         label="Active Members"
                         colSize={2}
                     />
@@ -173,7 +247,7 @@ export function Home() {
                                     <div>
                                         <small className="fw-bold">New Member Registered</small>
                                         <br />
-                                        <small className="text-muted">John Doe {Date.now()} joined today</small>
+                                        <small className="text-muted">John Doe joined today</small>
                                     </div>
                                 </div>
                                 <div className="d-flex align-items-center mb-3">
@@ -206,25 +280,31 @@ export function Home() {
                                 </Card.Header>
                                 <Card.Body>
                                     <div className="d-grid gap-2">
-                                        <button className="btn btn-outline-primary btn-sm" onClick={() => {
+                                        <Button variant="outline-primary" size="sm" onClick={() => {
                                             console.log("Add New Member");
                                             handleAddMemberModal(initialUserForm);
                                         }}>
                                             <i className="bi bi-person-plus me-2"></i>
                                             Add New Member
-                                        </button>
-                                        <button className="btn btn-outline-success btn-sm">
+                                        </Button>
+                                        <Button variant="outline-success" size="sm" onClick={() => {
+                                            console.log("Schedule Event");
+                                            setShowScheduleEvent(true);
+                                        }}>
                                             <i className="bi bi-calendar-plus me-2"></i>
                                             Schedule Event
-                                        </button>
-                                        <button className="btn btn-outline-info btn-sm">
+                                        </Button>
+                                        <Button variant="outline-info" size="sm" onClick={()=>{
+                                            console.log("Send newsletter");
+                                            navigate("/send-newsletter");
+                                        }}>
                                             <i className="bi bi-envelope me-2"></i>
                                             Send Newsletter
-                                        </button>
-                                        <button className="btn btn-outline-secondary btn-sm">
+                                        </Button>
+                                        <Button variant="outline-secondary" size="sm">
                                             <i className="bi bi-file-earmark-text me-2"></i>
                                             Generate Report
-                                        </button>
+                                        </Button>
                                     </div>
                                 </Card.Body>
                             </Card>
@@ -246,6 +326,15 @@ export function Home() {
             onEditSubmit={(updatedItem: UserForm) => {
                 console.log(updatedItem);
             }} />
+
+            {/* Schedule Event Modal */}
+            <ScheduleEventModal
+                show={showScheduleEvent}
+                onClose={() => setShowScheduleEvent(false)}
+                onSchedule={handleScheduleEvent}
+            />
+
+           
         </Container>
     );
 }

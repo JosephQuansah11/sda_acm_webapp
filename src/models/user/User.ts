@@ -11,6 +11,10 @@ type User = {
     address: Address;
     profile: UserProfile;
     role: string;
+    // Activity tracking fields
+    lastActive: Date | null;
+    status: 'active' | 'idle' | 'inactive';
+    churchId: string | null;
 };
 
 export type UserForm = {
@@ -22,6 +26,10 @@ export type UserForm = {
     address: AddressForm;
     profile: UserProfile;
     role: string;
+    // Activity tracking fields
+    lastActive: Date | null;
+    status: 'active' | 'idle' | 'inactive';
+    churchId: string | null;
 };
 
 export const initialUserForm: UserForm = {
@@ -49,6 +57,9 @@ export const initialUserForm: UserForm = {
         avatar: '',
     },
     role: '',
+    lastActive: null,
+    status: 'inactive',
+    churchId: null,
 };
 
 export default User;

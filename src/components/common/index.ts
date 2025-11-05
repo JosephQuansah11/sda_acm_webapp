@@ -8,3 +8,4 @@ export { ListView } from './ListView';
 export { TableControls } from './TableControls';
 export { EditModals } from './EditModals';
 export { AddForm } from './AddForm';
+export { ScheduleEventModal } from './ScheduleEventModal';

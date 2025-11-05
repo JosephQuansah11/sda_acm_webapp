@@ -3,21 +3,21 @@
       "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
       "target": "ESNext",
       "useDefineForClassFields": true,
-      // "lib": ["ES2020", "DOM", "DOM.Iterable"],
+      "lib": ["ESNext", "DOM", "DOM.Iterable"],
       "module": "ESNext",
-      "skipLibCheck": true,
+      "skipLibCheck": false,
+      "composite": true,
   
       /* Bundler mode */
       "moduleResolution": "Bundler",
-      "allowImportingTsExtensions": true,
-      "isolatedModules": true,
+      "isolatedModules": false,
       "moduleDetection": "force",
-      "noEmit": true,
+      "noEmit": false,
       "strict": true,
       "jsx": "react-jsx",
       "esModuleInterop": true,
-      "outDir": "./dist"
+      "outDir": "./dist",
     },
-    "include": ["src/**/*"]
+    "include": ["src/**/*", "src/types/**/*", "vite.config.ts"]
   }
   

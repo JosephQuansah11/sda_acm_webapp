@@ -50,8 +50,8 @@ mock.onPost('/api/auth/validate').reply(async (config) => {
 mock.onGet('/api/auth/validate').reply(async (config) => {
   try {
     const token = config.headers?.Authorization?.replace('Bearer ', '') || '';
-    const user = await mockAuthService.validateToken(token);
-    return [200, user];
+    const response = await mockAuthService.validateToken(token);
+    return [200, response];
   } catch (error) {
     return [401, { message: (error as Error).message }];
   }
@@ -82,7 +82,8 @@ mock.onPut('/api/user/preferences').reply(async (config) => {
   try {
     const config_data = JSON.parse(config.data);
     const token = (config_data.headers.Authorization.replace('Bearer ', '') || '');
-    const user = await mockAuthService.validateToken(token);
+    const response = await mockAuthService.validateToken(token);
+    const user = response.user;
     const requestedTheme = JSON.parse(config_data.data).theme;
     user.profile!.preferences!.theme = requestedTheme;
     await mockAuthService.updatePreferences(user.id.toString(), user.profile!.preferences!);

@@ -10,74 +10,106 @@ interface IWithChildren {
 }
 
 
-
 export function KeycloakSecurityProvider({ keycloak, children }: IWithChildren) {
     const [isInitialized, setIsInitialized] = useState(false);
-    
+
     useEffect(() => {
         const storedToken = localStorage.getItem('kc_token');
         const storedRefreshToken = localStorage.getItem('kc_refresh_token');
+
         keycloak.init({
             onLoad: "check-sso",
             // silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
             checkLoginIframe: true,
             pkceMethod: "S256",
+            // Pass tokens correctly if they exist
             ...(storedToken && storedRefreshToken ? {
                 token: storedToken,
                 refreshToken: storedRefreshToken
             } : {})
         }).then((authenticated) => {
+            console.log("Keycloak init result - Authenticated:", authenticated);
             if (authenticated) {
-                console.log("authenticated: ", authenticated);
-                // Store tokens on successful init
-                localStorage.setItem('kc_token', keycloak.token!);
-                localStorage.setItem('kc_refresh_token', keycloak.refreshToken!);
-                addAccessTokenToAuthHeader(keycloak.token);
+                // Ensure tokens are available after init
+                if (keycloak.token && keycloak.refreshToken) {
+                    console.log("Storing tokens after successful init");
+                    localStorage.setItem('kc_token', keycloak.token); // No JSON.stringify
+                    localStorage.setItem('kc_refresh_token', keycloak.refreshToken); // No JSON.stringify
+                    addAccessTokenToAuthHeader(keycloak.token);
+                } else {
+                    console.warn("Authenticated but tokens missing after init!");
+                    // Treat as not authenticated if tokens are missing
+                    localStorage.removeItem('kc_token');
+                    localStorage.removeItem('kc_refresh_token');
+                    removeAccessTokenFromAuthHeader();
+                }
             } else {
-                // Clear tokens if not authenticated
+                console.log("User not authenticated via Keycloak init.");
                 localStorage.removeItem('kc_token');
                 localStorage.removeItem('kc_refresh_token');
                 removeAccessTokenFromAuthHeader();
             }
-            setIsInitialized(true);
+            setIsInitialized(true); // Signal completion regardless of auth status
         }).catch((error) => {
-            console.error('Keycloak init failed:', error);
+            console.error('Keycloak initialization failed:', error);
+            localStorage.removeItem('kc_token');
+            localStorage.removeItem('kc_refresh_token');
             removeAccessTokenFromAuthHeader();
-            setIsInitialized(true);
+            setIsInitialized(true); // Signal completion even on error
         });
-    }, [keycloak])
+    }, [keycloak]); // Ensure keycloak instance is stable
 
+    // --- Fix token storage in event handlers ---
     keycloak.onAuthSuccess = () => {
-        localStorage.setItem('kc_token', JSON.stringify(keycloak.token));
-        localStorage.setItem('kc_refresh_token', JSON.stringify(keycloak.refreshToken));
-        addAccessTokenToAuthHeader(keycloak.token)
-    }
+        console.log("Keycloak onAuthSuccess triggered");
+        // Store token strings directly, not JSON strings
+        if (keycloak.token && keycloak.refreshToken) {
+            localStorage.setItem('kc_token', keycloak.token); // Fix here
+            localStorage.setItem('kc_refresh_token', keycloak.refreshToken); // Fix here
+            addAccessTokenToAuthHeader(keycloak.token);
+        }
+    };
 
     keycloak.onAuthLogout = () => {
+        console.log("Keycloak onAuthLogout triggered");
         localStorage.removeItem('kc_token');
         localStorage.removeItem('kc_refresh_token');
-        removeAccessTokenFromAuthHeader()
-    }
+        removeAccessTokenFromAuthHeader();
+    };
 
     keycloak.onAuthError = () => {
-        removeAccessTokenFromAuthHeader()
-    }
+        console.log("Keycloak onAuthError triggered");
+        // Optionally remove tokens on auth error
+        // localStorage.removeItem('kc_token');
+        // localStorage.removeItem('kc_refresh_token');
+        removeAccessTokenFromAuthHeader();
+    };
 
     keycloak.onTokenExpired = () => {
+        console.log("Keycloak token expired, attempting refresh...");
         keycloak.updateToken(30).then((refreshed) => {
             if (refreshed) {
-                localStorage.setItem('kc_token', keycloak.token!);
-                localStorage.setItem('kc_refresh_token', keycloak.refreshToken!);
-                addAccessTokenToAuthHeader(keycloak.token);
+                console.log("Keycloak token successfully refreshed");
+                // Store the NEW refreshed tokens directly
+                if (keycloak.token && keycloak.refreshToken) {
+                    localStorage.setItem('kc_token', keycloak.token); // Fix here
+                    localStorage.setItem('kc_refresh_token', keycloak.refreshToken); // Fix here
+                    addAccessTokenToAuthHeader(keycloak.token); // Update axios header
+                }
             } else {
-                console.warn('Token refresh failed');
+                console.warn('Keycloak token refresh failed (not refreshed)');
+                // Consider logout if refresh fails
                 keycloak.logout({ redirectUri: window.location.origin });
             }
-        }).catch(() => {
-            console.error('Token refresh error');
+        }).catch((error) => {
+            console.error('Keycloak token refresh error:', error);
+            // Clear tokens and logout on refresh error
+            localStorage.removeItem('kc_token');
+            localStorage.removeItem('kc_refresh_token');
+            removeAccessTokenFromAuthHeader();
             keycloak.logout({ redirectUri: window.location.origin });
         });
-    }
+    };
 
     function keycloakLogin() {
         keycloak.login()

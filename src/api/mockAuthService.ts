@@ -1,4 +1,4 @@
-import { LoginCredentials, VerificationState } from "../contexts/AuthContext";
+import { AuthState, LoginCredentials, VerificationState } from "../contexts/AuthLoginContext";
 import { verificationService } from "./verificationService";
 import { addUser, getAllUsers } from "./UserApi";
 import { getLoginPasswordEncoded } from "./UserApi";
@@ -57,7 +57,7 @@ export const mockAuthService = {
           type: verificationType,
         });
 
-        console.log("is this triggered?")
+      console.log("is this triggered?")
       if (verificationResponse.success) {
         // Return verification required response
         const verificationState: VerificationState = {
@@ -67,7 +67,7 @@ export const mockAuthService = {
           tempToken: `temp-token-${user.id}-${Date.now()}`,
         };
 
-        console.log("temp token for custom user: ",verificationState.tempToken)
+        console.log("temp token for custom user: ", verificationState.tempToken)
 
         return {
           requiresVerification: true,
@@ -112,14 +112,14 @@ export const mockAuthService = {
       if (user) {
         let token = "";
         const loginMethod = localStorage.getItem("loginMethod") as
-        | "custom"
-        | "keycloak"
-        | null;
+          | "custom"
+          | "keycloak"
+          | null;
 
-        if(loginMethod === "custom"){
+        if (loginMethod === "custom") {
           console.log("We should be here!!!!")
-         token = `mock-jwt-token-${user.id}-${Date.now()}`;
-        }else if(loginMethod === "keycloak"){
+          token = `mock-jwt-token-${user.id}-${Date.now()}`;
+        } else if (loginMethod === "keycloak") {
           console.log("Why are we here?")
           token = `mock-jwt-token-${user.keycloakId}-${Date.now()}`
         }
@@ -137,7 +137,7 @@ export const mockAuthService = {
     user?: UserForm;
     token?: string;
     requiresVerification?: boolean;
-    verificationState?: VerificationState | null;
+    authState?: AuthState | null;
   }> {
     const resultParsedData = JSON.parse(parsedData)
     const accessToken = resultParsedData.accessToken;
@@ -179,6 +179,10 @@ export const mockAuthService = {
         avatar: "https://api.dicebear.com/9.x/identicon/svg?seed=Avery",
       },
       role: "USER",
+      lastActive: null,
+      status: 'inactive',
+      churchId: null
+
     };
 
     // // Generate a mock JWT
@@ -190,17 +194,27 @@ export const mockAuthService = {
       type: "email",
       tempToken: `temp-token-${newUserId}-${Date.now()}`,
     };
+
     // mockUsers.push(mockUser);
     const userId = newUserId;
     const user = mockUsers.find((u: User) => String(u.id) == userId || u.keycloakId == userId);
     if (!user) {
       addUser(newUser)
     }
-    return { user: user, token, requiresVerification, verificationState };
+
+    const authState:AuthState = {
+      user: user!,
+      isAuthenticated: keycloakParsed.authenticated,
+      isLoading: false,
+      error: null,
+      verificationState: verificationState,
+      loginMethod: "keycloak"
+    }
+    return { user: user, token, requiresVerification, authState };
   },
 
   // Simulate token validation
-  async validateToken(token: string): Promise<User> {
+  async validateToken(token: string): Promise<{ user: User, authState: AuthState }> {
     // Simulate network delay
     // await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -224,9 +238,31 @@ export const mockAuthService = {
       }, "");
       const userId = deducedUserId;
       const user = mockUsers.find((u: User) => String(u.id) == userId || u.keycloakId == userId);
-   
+
+      const loginMethod = localStorage.getItem("loginMethod") as
+        | "custom"
+        | "keycloak"
+        | null;
+
+
+      const verificationState: VerificationState = {
+        isVerificationRequired: true,
+        identifier: "email",
+        type: "email",
+        tempToken: `temp-token-${userId}-${Date.now()}`,
+      };
+      const authState: AuthState = {
+        user: user!,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+        loginMethod: loginMethod,
+        verificationState: verificationState
+      }
+
+
       if (user) {
-        return user;
+        return { user, authState };
       }
     }
 

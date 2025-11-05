@@ -16,9 +16,7 @@ import { withRequireAuth } from "./security/withAuth";
 
 // Import mock service for demo purposes
 import "./api/authPromise";
-import keycloak from "keycloak-js";
-import { AuthProvider } from "./contexts/AuthContext";
-import { useSecurityContext } from "./models/auth/KeycloakSecurityProvider";
+import NewsletterPreview from "./pages/newsletter/NewsLetterPreview";
 
 // Protected layout component
 function ProtectedLayout() {
@@ -33,6 +31,7 @@ function ProtectedLayout() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/add-member" element={<AddMember />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/send-newsletter" element={<NewsletterPreview />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </main>
