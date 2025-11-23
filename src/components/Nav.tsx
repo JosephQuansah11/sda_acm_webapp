@@ -14,6 +14,7 @@ export function CustomNav() {
         { href: '/members', icon: 'bi bi-people', title: 'Members' },
         { href: '/events', icon: 'bi bi-calendar', title: 'Events' },
         { href: '/settings', icon: 'bi bi-gear', title: 'Settings' },
+        { href: '/translation', icon: 'bi bi-speak', title: 'Translation'}
     ];
 
     const handleShowHelp = () => {

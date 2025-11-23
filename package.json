@@ -41,6 +41,7 @@
     "dompurify": "^3.0.6",
     "flow-bin": "^0.288.0",
     "keycloak-js": "^26.2.1",
+    "lucide-react": "^0.553.0",
     "react": "^19.2.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.0",

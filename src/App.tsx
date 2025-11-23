@@ -17,6 +17,7 @@ import { withRequireAuth } from "./security/withAuth";
 // Import mock service for demo purposes
 import "./api/authPromise";
 import NewsletterPreview from "./pages/newsletter/NewsLetterPreview";
+import TranslateAudioPage from "./pages/translation/TranslateAudioPage";
 
 // Protected layout component
 function ProtectedLayout() {
@@ -32,6 +33,7 @@ function ProtectedLayout() {
           <Route path="/add-member" element={<AddMember />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/send-newsletter" element={<NewsletterPreview />} />
+          <Route path="/translation" element={<TranslateAudioPage/>} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </main>
